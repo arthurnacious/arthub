@@ -15,9 +15,9 @@ const NAV_ITEMS = [
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--panel)] p-4">
-        <div className="mb-6 text-sm font-bold tracking-widest text-[var(--accent)]">
-          ARTHUB<span className="text-[var(--text-dim)]">_</span>
+      <aside className="glow-border flex w-56 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--panel)] p-4">
+        <div className="glow-text mb-6 text-sm font-bold tracking-widest text-[var(--accent)]">
+          ARTHUB<span className="cursor-blink text-[var(--accent)]">_</span>
         </div>
         <nav className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => (
