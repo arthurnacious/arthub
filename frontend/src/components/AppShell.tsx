@@ -1,14 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-
-const NAV_ITEMS = [
-  { to: '/', label: 'dashboard' },
-  { to: '/clients', label: 'clients' },
-  { to: '/projects', label: 'projects' },
-  { to: '/quotes', label: 'quotes' },
-  { to: '/invoices', label: 'invoices' },
-  { to: '/activity', label: 'activity' },
-] as const
+import { ROUTES } from '../lib/routes'
 
 // Terminal-style app shell: a fixed sidebar of route links plus the routed
 // page content. Wraps every route via src/routes/__root.tsx.
@@ -20,17 +12,17 @@ export function AppShell({ children }: { children: ReactNode }) {
           ARTHUB<span className="cursor-blink text-[var(--accent)]">_</span>
         </div>
         <nav className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => (
+          {ROUTES.map((route) => (
             <Link
-              key={item.to}
-              to={item.to}
-              activeOptions={{ exact: item.to === '/' }}
+              key={route.path}
+              to={route.path}
+              activeOptions={{ exact: route.path === '/' }}
               className="rounded px-2 py-1 text-sm text-[var(--text-dim)] transition-colors hover:bg-[var(--accent-dim)] hover:text-[var(--text)]"
               activeProps={{
                 className: 'bg-[var(--accent-dim)] text-[var(--accent)]',
               }}
             >
-              &gt; {item.label}
+              &gt; {route.name}
             </Link>
           ))}
         </nav>
