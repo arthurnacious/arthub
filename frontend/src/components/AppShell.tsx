@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { ROUTES } from '../lib/routes'
 import { useVimNavigation } from '../hooks/use-vim-navigation'
+import { TopBar } from './TopBar'
 
 // Terminal-style app shell: a fixed sidebar of route links plus the routed
 // page content. Wraps every route via src/routes/__root.tsx.
@@ -39,7 +40,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           j/k select &middot; enter go &middot; h back &middot; : command
         </p>
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+      <div className="flex flex-1 flex-col">
+        <TopBar />
+        <main className="flex-1 p-8">{children}</main>
+      </div>
     </div>
   )
 }

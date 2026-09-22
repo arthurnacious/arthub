@@ -7,7 +7,6 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { AppShell } from '../components/AppShell'
 import { ScanlineOverlay } from '../components/ScanlineOverlay'
 import { CommandBar } from '../components/CommandBar'
@@ -55,9 +54,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ScanlineOverlay />
-        <div className="fixed right-4 top-4 z-50">
-          <ThemeToggle />
-        </div>
         <AppShell>{children}</AppShell>
         <CommandBar />
         <TanStackDevtools
