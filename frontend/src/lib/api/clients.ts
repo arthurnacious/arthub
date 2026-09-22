@@ -47,6 +47,17 @@ export async function fetchClients({
   return { data, page, pageSize, total: filtered.length }
 }
 
+// Stand-in for `POST /clients`.
+export async function createClient(
+  input: Omit<Client, 'id' | 'projects'>,
+): Promise<Client> {
+  await networkDelay()
+
+  const created: Client = { ...input, id: crypto.randomUUID(), projects: 0 }
+  clientsStore = [created, ...clientsStore]
+  return created
+}
+
 // Stand-in for `GET /clients/:id`.
 export async function fetchClient(id: string): Promise<Client | null> {
   await networkDelay()

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   __resetClientsStoreForTests,
+  createClient,
   deleteClient,
   fetchClient,
   fetchClients,
@@ -73,6 +74,42 @@ describe('updateClient', () => {
 
   it('rejects an unknown id', async () => {
     await expect(updateClient('nonexistent', { company: 'x' })).rejects.toThrow()
+  })
+})
+
+describe('createClient', () => {
+  it('adds a new client with a generated id and zero projects', async () => {
+    const created = await createClient({
+      company: 'New Co',
+      contact: 'Jamie Lee',
+      email: 'jamie@newco.test',
+      status: 'prospect',
+    })
+
+    expect(created.id).toBeTruthy()
+    expect(created.company).toBe('New Co')
+    expect(created.projects).toBe(0)
+  })
+
+  it('makes the new client show up in fetchClients', async () => {
+    const before = await fetchClients({ page: 1, pageSize: 100, search: '' })
+    await createClient({
+      company: 'New Co',
+      contact: 'Jamie Lee',
+      email: 'jamie@newco.test',
+      status: 'prospect',
+    })
+    const after = await fetchClients({ page: 1, pageSize: 100, search: '' })
+
+    expect(after.total).toBe(before.total + 1)
+    expect(after.data.some((c) => c.company === 'New Co')).toBe(true)
+  })
+
+  it('generates unique ids for successive clients', async () => {
+    const a = await createClient({ company: 'A', contact: 'A', email: 'a@test', status: 'prospect' })
+    const b = await createClient({ company: 'B', contact: 'B', email: 'b@test', status: 'prospect' })
+
+    expect(a.id).not.toBe(b.id)
   })
 })
 

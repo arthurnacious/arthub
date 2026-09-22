@@ -4,10 +4,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Panel } from '../components/Panel'
 import { ClientsTable } from '../components/ClientsTable'
 import { Pagination } from '../components/Pagination'
-import { fetchClients, deleteClient } from '../lib/api/clients'
+import { Modal } from '../components/Modal'
+import { ClientForm } from '../components/ClientForm'
+import type { ClientFormValues } from '../components/ClientForm'
+import { fetchClients, deleteClient, createClient } from '../lib/api/clients'
 import { useDebouncedValue } from '../hooks/use-debounced-value'
 import { useConfirm } from '../hooks/use-confirm'
 import type { Client } from '../lib/mock-clients'
+
+const EMPTY_CLIENT: ClientFormValues = {
+  company: '',
+  contact: '',
+  email: '',
+  status: 'prospect',
+}
 
 const PAGE_SIZE = 5
 
@@ -75,9 +85,30 @@ function ClientsPage() {
     deleteMutation.mutate(client)
   }
 
+  const [newClientOpen, setNewClientOpen] = useState(false)
+  const [newClientForm, setNewClientForm] = useState<ClientFormValues>(EMPTY_CLIENT)
+
+  const createMutation = useMutation({
+    mutationFn: (values: ClientFormValues) => createClient(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      setNewClientOpen(false)
+      setNewClientForm(EMPTY_CLIENT)
+    },
+  })
+
   return (
     <div>
-      <h1 className="glow-text text-lg font-bold text-[var(--accent)]">CLIENTS</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">CLIENTS</h1>
+        <button
+          type="button"
+          onClick={() => setNewClientOpen(true)}
+          className="rounded border border-[var(--accent)] bg-[var(--accent-dim)] px-3 py-1.5 text-xs text-[var(--accent)] transition-colors hover:bg-[var(--accent)] hover:text-[var(--bg)]"
+        >
+          + new
+        </button>
+      </div>
       <p className="mt-2 text-sm text-[var(--text-dim)]">
         // server-paginated - showing mock data until a real /clients endpoint exists
       </p>
@@ -123,6 +154,18 @@ function ClientsPage() {
         </Panel>
       </div>
       {dialog}
+      {newClientOpen && (
+        <Modal title="new client" onClose={() => setNewClientOpen(false)}>
+          <ClientForm
+            values={newClientForm}
+            onChange={setNewClientForm}
+            onSubmit={() => createMutation.mutate(newClientForm)}
+            onCancel={() => setNewClientOpen(false)}
+            submitLabel="create"
+            submitting={createMutation.isPending}
+          />
+        </Modal>
+      )}
     </div>
   )
 }
