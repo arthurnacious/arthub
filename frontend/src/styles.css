@@ -34,6 +34,7 @@
   --text: #d4d4d8; /* zinc-300 */
   --text-dim: #71717a; /* zinc-500 */
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  --grid-line: rgb(255 255 255 / 4%);
 }
 
 * {
@@ -48,8 +49,92 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: var(--font-mono);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at center, transparent 0%, rgb(0 0 0 / 70%) 100%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    40px 40px,
+    40px 40px;
+  background-attachment: fixed;
+}
+
+/* Text/border glow, used on accent-colored headings, logos and panels to
+   sell the "sci-fi terminal" look. */
+.glow-text {
+  text-shadow:
+    0 0 6px var(--accent),
+    0 0 14px var(--accent-dim);
+}
+
+.glow-border {
+  box-shadow:
+    0 0 10px var(--accent-dim),
+    inset 0 0 10px var(--accent-dim);
+}
+
+@keyframes blink-cursor {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* Fixed, pointer-events-none CRT overlay: static scanlines plus a slow
+   sweeping highlight band. See src/components/ScanlineOverlay.tsx. */
+.scanline-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgb(255 255 255 / 3.5%) 0px,
+    rgb(255 255 255 / 3.5%) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--accent-dim) 50%,
+    transparent 100%
+  );
+  opacity: 0.3;
+  animation: scan-sweep 6s linear infinite;
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-blink,
+  .scanline-overlay::after {
+    animation: none;
+  }
 }
 
