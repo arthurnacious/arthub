@@ -1,17 +1,23 @@
 import { StatusBadge } from './StatusBadge'
-import type { StatusTone } from './StatusBadge'
-import type { Client, ClientStatus } from '../lib/mock-clients'
+import { RowActionsMenu } from './RowActionsMenu'
+import { CLIENT_STATUS_TONE } from '../lib/mock-clients'
+import type { Client } from '../lib/mock-clients'
 
-const STATUS_TONE: Record<ClientStatus, StatusTone> = {
-  active: 'success',
-  prospect: 'info',
-  inactive: 'neutral',
-}
-
-// Presentational only - renders whatever page of clients it's given.
-// Where that page comes from (mock or real, paginated server-side) is the
+// Presentational only - renders whatever page of clients it's given, and
+// leaves what view/update/delete actually do to the caller. Where the
+// page comes from (mock or real, paginated server-side) is likewise the
 // caller's concern - see src/routes/clients.tsx.
-export function ClientsTable({ clients }: { clients: Client[] }) {
+export function ClientsTable({
+  clients,
+  onView,
+  onUpdate,
+  onDelete,
+}: {
+  clients: Client[]
+  onView: (client: Client) => void
+  onUpdate: (client: Client) => void
+  onDelete: (client: Client) => void
+}) {
   if (clients.length === 0) {
     return <p className="text-sm text-[var(--text-dim)]">-- no clients match --</p>
   }
@@ -24,7 +30,8 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
           <th className="py-2 pr-4 font-normal">Contact</th>
           <th className="py-2 pr-4 font-normal">Email</th>
           <th className="py-2 pr-4 font-normal">Status</th>
-          <th className="py-2 text-right font-normal">Projects</th>
+          <th className="py-2 pr-4 text-right font-normal">Projects</th>
+          <th className="py-2 text-right font-normal" aria-label="Actions" />
         </tr>
       </thead>
       <tbody>
@@ -37,9 +44,18 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
             <td className="py-2 pr-4 text-[var(--text-dim)]">{client.contact}</td>
             <td className="py-2 pr-4 text-[var(--text-dim)]">{client.email}</td>
             <td className="py-2 pr-4">
-              <StatusBadge label={client.status} tone={STATUS_TONE[client.status]} />
+              <StatusBadge label={client.status} tone={CLIENT_STATUS_TONE[client.status]} />
             </td>
-            <td className="py-2 text-right text-[var(--text-dim)]">{client.projects}</td>
+            <td className="py-2 pr-4 text-right text-[var(--text-dim)]">{client.projects}</td>
+            <td className="py-2 text-right">
+              <RowActionsMenu
+                item={client}
+                label={client.company}
+                onView={onView}
+                onUpdate={onUpdate}
+                onDelete={onDelete}
+              />
+            </td>
           </tr>
         ))}
       </tbody>

@@ -1,3 +1,5 @@
+import type { StatusTone } from '../components/StatusBadge'
+
 export type ClientStatus = 'active' | 'prospect' | 'inactive'
 
 export interface Client {
@@ -7,6 +9,12 @@ export interface Client {
   email: string
   status: ClientStatus
   projects: number
+}
+
+export const CLIENT_STATUS_TONE: Record<ClientStatus, StatusTone> = {
+  active: 'success',
+  prospect: 'info',
+  inactive: 'neutral',
 }
 
 // Placeholder client list until this is wired to the backend (no
