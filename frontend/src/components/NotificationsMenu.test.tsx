@@ -1,139 +1,76 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  RouterProvider,
-  createMemoryHistory,
-  createRootRoute,
-  createRoute,
-  createRouter,
-} from '@tanstack/react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { NotificationsMenu } from './NotificationsMenu'
-import * as activityApi from '../lib/api/activity'
-import type { ActivityEntry } from '../lib/api/activity'
+import type { Notification } from './NotificationsMenu'
 
-const CLIENT_EVENT: ActivityEntry = {
-  id: '1',
-  user_id: 'u1',
-  action: 'client.created',
-  description: 'Created client Nimbus Retail',
-  subject_type: 'client',
-  subject_id: 'c1',
-  metadata: null,
-  created_at: new Date().toISOString(),
-}
-
-const LOGIN_EVENT: ActivityEntry = {
-  id: '2',
-  user_id: 'u1',
-  action: 'auth.login',
-  description: 'Admin logged in',
-  subject_type: null,
-  subject_id: null,
-  metadata: null,
-  created_at: new Date().toISOString(),
-}
-
-function renderWithProviders(initialPath = '/') {
-  const rootRoute = createRootRoute({ component: NotificationsMenu })
-  const clientRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: '/clients/$clientId',
-    component: () => null,
-  })
-
-  const router = createRouter({
-    routeTree: rootRoute.addChildren([clientRoute]),
-    history: createMemoryHistory({ initialEntries: [initialPath] }),
-  })
-  const queryClient = new QueryClient()
-
-  render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  )
-
-  return { router }
-}
-
-afterEach(() => {
-  vi.restoreAllMocks()
-})
+const SEEDED: Notification[] = [
+  { id: '1', message: 'Invoice INV-0001 was paid', timestamp: '2m ago' },
+  { id: '2', message: 'Invoice INV-0002 was paid', timestamp: '1h ago' },
+]
 
 describe('NotificationsMenu', () => {
-  it('shows the count of real activity entries on the toggle button', async () => {
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([CLIENT_EVENT, LOGIN_EVENT])
-    renderWithProviders()
-
-    expect(
-      await screen.findByRole('button', { name: /notifications \(2\)/i }),
-    ).toBeInTheDocument()
-  })
-
-  it('is closed until clicked', async () => {
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([CLIENT_EVENT])
-    renderWithProviders()
+  it('is closed until clicked', () => {
+    render(<NotificationsMenu />)
 
     expect(screen.queryByText('notifications')).not.toBeInTheDocument()
   })
 
-  it('opens the panel and lists real activity descriptions', async () => {
+  it('shows no badge and an "all caught up" placeholder - there are no real notifications yet', async () => {
     const user = userEvent.setup()
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([CLIENT_EVENT])
-    renderWithProviders()
+    render(<NotificationsMenu />)
 
-    await user.click(await screen.findByRole('button', { name: /notifications/i }))
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument()
+    expect(screen.queryByText(/^\d+$/)).not.toBeInTheDocument()
 
-    expect(screen.getByText('Created client Nimbus Retail')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /notifications/i }))
+
+    expect(screen.getByText('-- all caught up --')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /clear all/i })).not.toBeInTheDocument()
   })
 
-  it('navigates to the client on click for a client-subject entry', async () => {
+  it('shows the count badge and lists seeded notifications', async () => {
     const user = userEvent.setup()
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([CLIENT_EVENT])
-    const { router } = renderWithProviders()
+    render(<NotificationsMenu initialNotifications={SEEDED} />)
 
-    await user.click(await screen.findByRole('button', { name: /notifications/i }))
-    await user.click(screen.getByText('Created client Nimbus Retail'))
+    expect(screen.getByRole('button', { name: /notifications/i })).toHaveTextContent('2')
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/clients/c1'))
-    expect(screen.queryByText('notifications')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /notifications/i }))
+
+    expect(screen.getByText('Invoice INV-0001 was paid')).toBeInTheDocument()
+    expect(screen.getByText('Invoice INV-0002 was paid')).toBeInTheDocument()
   })
 
-  it('renders a non-navigable entry as plain text, not a button', async () => {
+  it('removes a single notification without touching the others', async () => {
     const user = userEvent.setup()
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([LOGIN_EVENT])
-    renderWithProviders()
+    render(<NotificationsMenu initialNotifications={SEEDED} />)
 
-    await user.click(await screen.findByRole('button', { name: /notifications/i }))
+    await user.click(screen.getByRole('button', { name: /notifications/i }))
+    await user.click(screen.getByRole('button', { name: /dismiss invoice inv-0001/i }))
 
-    expect(
-      screen.queryByRole('button', { name: /admin logged in/i }),
-    ).not.toBeInTheDocument()
-    expect(screen.getByText('Admin logged in')).toBeInTheDocument()
+    expect(screen.queryByText('Invoice INV-0001 was paid')).not.toBeInTheDocument()
+    expect(screen.getByText('Invoice INV-0002 was paid')).toBeInTheDocument()
+  })
+
+  it('clears all notifications and shows the empty state', async () => {
+    const user = userEvent.setup()
+    render(<NotificationsMenu initialNotifications={SEEDED} />)
+
+    await user.click(screen.getByRole('button', { name: /notifications/i }))
+    await user.click(screen.getByRole('button', { name: /clear all/i }))
+
+    expect(screen.getByText('-- all caught up --')).toBeInTheDocument()
   })
 
   it('closes on Escape', async () => {
     const user = userEvent.setup()
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([CLIENT_EVENT])
-    renderWithProviders()
+    render(<NotificationsMenu />)
 
-    await user.click(await screen.findByRole('button', { name: /notifications/i }))
+    await user.click(screen.getByRole('button', { name: /notifications/i }))
     expect(screen.getByText('notifications')).toBeInTheDocument()
 
     fireEvent.keyDown(document, { key: 'Escape' })
 
     expect(screen.queryByText('notifications')).not.toBeInTheDocument()
-  })
-
-  it('shows a placeholder with no activity yet', async () => {
-    const user = userEvent.setup()
-    vi.spyOn(activityApi, 'fetchActivity').mockResolvedValue([])
-    renderWithProviders()
-
-    await user.click(await screen.findByRole('button', { name: /notifications \(0\)/i }))
-
-    expect(screen.getByText('-- no notifications --')).toBeInTheDocument()
   })
 })
