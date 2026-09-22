@@ -10,6 +10,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { AppShell } from '../components/AppShell'
 import { ScanlineOverlay } from '../components/ScanlineOverlay'
+import { CommandBar } from '../components/CommandBar'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
 
 import appCss from '../styles.css?url'
@@ -58,6 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <ThemeToggle />
         </div>
         <AppShell>{children}</AppShell>
+        <CommandBar />
         <TanStackDevtools
           config={{
             position: 'bottom-right',
