@@ -32,4 +32,24 @@ describe('RadarBackground', () => {
 
     expect(firstTops).not.toEqual(secondTops)
   })
+
+  it('keeps every blip on the same animation clock as the sweep, so each only flashes once the sweep reaches its angle', () => {
+    const { container } = render(<RadarBackground />)
+
+    const sweepDuration = (
+      container.querySelector('.radar-sweep') as HTMLElement
+    ).style.animationDuration
+    expect(sweepDuration).toMatch(/^\d+s$/)
+
+    const sweepSeconds = Number.parseFloat(sweepDuration)
+
+    for (const blip of container.querySelectorAll('.radar-blip')) {
+      const style = (blip as HTMLElement).style
+      expect(style.animationDuration).toBe(sweepDuration)
+
+      const delaySeconds = Number.parseFloat(style.animationDelay)
+      expect(delaySeconds).toBeGreaterThanOrEqual(0)
+      expect(delaySeconds).toBeLessThan(sweepSeconds)
+    }
+  })
 })
