@@ -8,6 +8,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { AppShell } from '../components/AppShell'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
 
 import appCss from '../styles.css?url'
@@ -54,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <div className="fixed right-4 top-4 z-50">
           <ThemeToggle />
         </div>
-        {children}
+        <AppShell>{children}</AppShell>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
