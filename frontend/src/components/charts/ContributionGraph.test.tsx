@@ -54,4 +54,28 @@ describe('ContributionGraph', () => {
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
+
+  it('labels a month once, at its first week, when the range spans months', () => {
+    render(
+      <ContributionGraph
+        data={[
+          { date: '2026-05-28', count: 1 },
+          { date: '2026-06-15', count: 1 },
+        ]}
+      />,
+    )
+
+    expect(screen.getByText('May')).toBeInTheDocument()
+    expect(screen.getByText('Jun')).toBeInTheDocument()
+  })
+
+  it('scales to fill the width of its container', () => {
+    const { container } = render(
+      <ContributionGraph data={[{ date: '2026-06-02', count: 1 }]} />,
+    )
+
+    const svg = container.querySelector('svg')
+    expect(svg).toHaveAttribute('viewBox')
+    expect(svg?.style.width).toBe('100%')
+  })
 })

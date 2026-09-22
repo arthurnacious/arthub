@@ -5,6 +5,12 @@ export interface ContributionDay {
 
 const CELL = 11
 const GAP = 3
+const MONTH_LABEL_HEIGHT = 16
+
+const MONTH_NAMES = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+]
 
 // Local-time date helpers (not UTC / toISOString round-tripping), so this
 // never shifts a day depending on the viewer's timezone offset.
@@ -67,24 +73,58 @@ function buildWeeks(data: ContributionDay[]): ContributionDay[][] {
   return weeks
 }
 
+interface MonthLabel {
+  weekIndex: number
+  label: string
+}
+
+// One label per month, placed at that month's first week column.
+function monthLabels(weeks: ContributionDay[][]): MonthLabel[] {
+  const labels: MonthLabel[] = []
+  let lastMonth = -1
+
+  weeks.forEach((week, weekIndex) => {
+    const month = parseLocalDate(week[0].date).getMonth()
+    if (month !== lastMonth) {
+      labels.push({ weekIndex, label: MONTH_NAMES[month] })
+      lastMonth = month
+    }
+  })
+
+  return labels
+}
+
 // GitHub-style contribution heatmap: one column per week, one row per day
-// (Sun-Sat), cell opacity scaled to that day's count.
+// (Sun-Sat), cell opacity scaled to that day's count, month labels above.
+// Scales to fill its container's width (viewBox + width: 100%) rather than
+// rendering at a small fixed pixel size.
 export function ContributionGraph({ data }: { data: ContributionDay[] }) {
   const weeks = buildWeeks(data)
   if (weeks.length === 0) return null
 
   const total = data.reduce((sum, d) => sum + d.count, 0)
-  const width = weeks.length * (CELL + GAP)
-  const height = 7 * (CELL + GAP)
+  const gridWidth = weeks.length * (CELL + GAP)
+  const gridHeight = 7 * (CELL + GAP)
+  const viewWidth = gridWidth
+  const viewHeight = gridHeight + MONTH_LABEL_HEIGHT
 
   return (
     <svg
       role="img"
       aria-label={`Contribution graph: ${total} events over ${data.length} days`}
-      width={width}
-      height={height}
-      className="overflow-visible"
+      viewBox={`0 0 ${viewWidth} ${viewHeight}`}
+      style={{ width: '100%', height: 'auto', aspectRatio: `${viewWidth} / ${viewHeight}` }}
     >
+      {monthLabels(weeks).map(({ weekIndex, label }) => (
+        <text
+          key={label + weekIndex}
+          x={weekIndex * (CELL + GAP)}
+          y={MONTH_LABEL_HEIGHT - 6}
+          className="fill-[var(--text-dim)] text-[9px]"
+        >
+          {label}
+        </text>
+      ))}
       {weeks.map((week, wi) =>
         week.map((day, di) => {
           const level = levelFor(day.count)
@@ -95,7 +135,7 @@ export function ContributionGraph({ data }: { data: ContributionDay[] }) {
               data-date={day.date}
               data-level={level}
               x={wi * (CELL + GAP)}
-              y={di * (CELL + GAP)}
+              y={MONTH_LABEL_HEIGHT + di * (CELL + GAP)}
               width={CELL}
               height={CELL}
               rx={2}

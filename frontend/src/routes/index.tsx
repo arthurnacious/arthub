@@ -1,7 +1,13 @@
+import { useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { KernelLog } from '../components/KernelLog'
 import { Panel } from '../components/Panel'
 import { StatusBadge } from '../components/StatusBadge'
+import { ContributionGraph } from '../components/charts/ContributionGraph'
+import { BarChart } from '../components/charts/BarChart'
+import { PieChart } from '../components/charts/PieChart'
+import { generateMockActivity } from '../lib/mock-activity'
+import { generateMockRevenue } from '../lib/mock-revenue'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -19,7 +25,21 @@ const MOCK_STATS = [
   { label: 'overdue invoices', value: 0, tone: 'danger' as const },
 ]
 
+// Placeholder invoice status breakdown until invoices are wired to the backend.
+const MOCK_INVOICE_STATUS = [
+  { label: 'paid', value: 14, tone: 'success' as const },
+  { label: 'pending', value: 5, tone: 'warning' as const },
+  { label: 'overdue', value: 2, tone: 'danger' as const },
+  { label: 'draft', value: 3, tone: 'neutral' as const },
+]
+
 function Home() {
+  // 53 weeks (371 days) so a full 12 months always show, ending on the
+  // current month. Generated once per mount, not on every render - see
+  // generateMockActivity.
+  const activity = useMemo(() => generateMockActivity(371), [])
+  const revenue = useMemo(() => generateMockRevenue(), [])
+
   return (
     <div>
       <h1 className="glow-text text-lg font-bold text-[var(--accent)]">DASHBOARD</h1>
@@ -39,6 +59,15 @@ function Home() {
         </Panel>
         <Panel title="kernel_log">
           <KernelLog entries={MOCK_ENTRIES} />
+        </Panel>
+        <Panel title="activity_graph" className="md:col-span-2">
+          <ContributionGraph data={activity} />
+        </Panel>
+        <Panel title="revenue">
+          <BarChart data={revenue} />
+        </Panel>
+        <Panel title="invoice_status">
+          <PieChart data={MOCK_INVOICE_STATUS} />
         </Panel>
       </div>
     </div>
