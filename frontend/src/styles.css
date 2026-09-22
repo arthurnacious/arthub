@@ -27,6 +27,15 @@
   --accent-dim: rgb(248 113 113 / 20%);
 }
 
+:root {
+  --bg: #0a0a0a;
+  --panel: #111214;
+  --border: #27272a;
+  --text: #d4d4d8; /* zinc-300 */
+  --text-dim: #71717a; /* zinc-500 */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -39,5 +48,8 @@ body,
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
 }
 
