@@ -42,10 +42,19 @@
   box-sizing: border-box;
 }
 
+/* Plain (unlayered) rules here beat ANY Tailwind utility class on the same
+   element, regardless of specificity - Tailwind's utilities live in
+   @layer, and per the CSS cascade-layers spec, unlayered rules always win
+   over layered ones. That previously made a stray `min-height: 100%` here
+   silently override Tailwind's `min-h-screen` on <body> (and `100%` was
+   itself inert, since <html> has no explicit height for it to resolve
+   against) - the page shrank to fit its content instead of filling the
+   viewport. min-height/height are set here directly instead of relying on
+   a min-h-screen/h-screen class, dvh so mobile browser chrome doesn't
+   cause scroll jumps. */
 html,
-body,
-#app {
-  min-height: 100%;
+body {
+  height: 100dvh;
 }
 
 body {

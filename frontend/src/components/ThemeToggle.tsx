@@ -10,9 +10,13 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={() => themeStore.cycleColor()}
-      className="border border-[var(--accent)] px-3 py-1 font-mono text-xs uppercase tracking-wider text-[var(--accent)] transition-colors hover:bg-[var(--accent-dim)]"
+      className="flex items-center gap-2 rounded border border-[var(--border)] px-2 py-1 text-xs uppercase tracking-wider text-[var(--text-dim)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
       aria-label={`Theme color: ${color}. Click to cycle.`}
     >
+      <span
+        className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--accent)]"
+        aria-hidden="true"
+      />
       {color}
     </button>
   )

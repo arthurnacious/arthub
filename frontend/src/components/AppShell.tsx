@@ -16,9 +16,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { selectedIndex } = useVimNavigation()
 
   return (
-    <div className="flex flex-1">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--panel)]">
-        <div className="glow-text border-b border-[var(--border)] px-4 py-3 text-sm font-bold tracking-widest text-[var(--accent)]">
+    <div className="flex flex-1 overflow-hidden">
+      <aside className="flex w-56 shrink-0 flex-col overflow-y-auto border-r border-[var(--border)] bg-[var(--panel)]">
+        <div className="glow-text flex h-14 shrink-0 items-center border-b border-[var(--border)] px-4 text-sm font-bold tracking-widest text-[var(--accent)]">
           ARTHUB<span className="cursor-blink">_</span>
         </div>
         <nav className="flex flex-col gap-0.5 p-2">
@@ -39,9 +39,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
       </aside>
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
     </div>
   )
