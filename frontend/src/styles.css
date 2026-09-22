@@ -1,4 +1,5 @@
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 @import "tailwindcss";
 
 /*
@@ -134,6 +135,79 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cursor-blink,
   .scanline-overlay::after {
+    animation: none;
+  }
+}
+
+/* Decorative radar-scope background: a rotating sweep, static range rings
+   and a handful of pulsing "blips" (randomized once per mount in
+   src/components/RadarBackground.tsx). Every animation here only touches
+   transform/opacity, so it's compositor-only and effectively free - no
+   per-frame JS, nothing to cost real frames. */
+.radar-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.radar-rings {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    var(--grid-line) 0px,
+    var(--grid-line) 1px,
+    transparent 1px,
+    transparent 110px
+  );
+}
+
+.radar-sweep {
+  position: absolute;
+  inset: -50%;
+  transform-origin: center;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent-dim) 0deg,
+    transparent 35deg,
+    transparent 360deg
+  );
+  animation: radar-spin 9s linear infinite;
+}
+
+@keyframes radar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-blip {
+  position: absolute;
+  border-radius: 9999px;
+  background: var(--accent);
+  animation-name: radar-blip-pulse;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes radar-blip-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-sweep,
+  .radar-blip {
     animation: none;
   }
 }

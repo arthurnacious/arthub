@@ -9,6 +9,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { AppShell } from '../components/AppShell'
 import { ScanlineOverlay } from '../components/ScanlineOverlay'
+import { RadarBackground } from '../components/RadarBackground'
 import { CommandBar } from '../components/CommandBar'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
 
@@ -53,6 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <RadarBackground />
         <ScanlineOverlay />
         <AppShell>{children}</AppShell>
         <CommandBar />
