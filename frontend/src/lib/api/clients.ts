@@ -1,18 +1,6 @@
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from './http'
+import type { PaginatedResult, PaginationParams } from './pagination'
 import type { Client } from '../mock-clients'
-
-export interface PaginatedResult<T> {
-  data: T[]
-  page: number
-  pageSize: number
-  total: number
-}
-
-export interface FetchClientsParams {
-  page: number
-  pageSize: number
-  search: string
-}
 
 // GET /clients?page=&pageSize=&q= - server-side pagination and search, see
 // backend/src/Modules/Clients/ClientsController.php.
@@ -20,7 +8,7 @@ export function fetchClients({
   page,
   pageSize,
   search,
-}: FetchClientsParams): Promise<PaginatedResult<Client>> {
+}: PaginationParams): Promise<PaginatedResult<Client>> {
   const params = new URLSearchParams({
     page: String(page),
     pageSize: String(pageSize),

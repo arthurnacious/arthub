@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { fetchActivity } from './activity'
+import { fetchActivity, fetchActivityLog } from './activity'
 import * as http from './http'
 import type { ActivityEntry } from './activity'
 
@@ -26,5 +26,17 @@ describe('fetchActivity', () => {
 
     expect(apiGetSpy).toHaveBeenCalledWith('/activity-log')
     expect(result).toEqual([ENTRY])
+  })
+})
+
+describe('fetchActivityLog', () => {
+  it('requests the right query string and returns the paginated result as-is', async () => {
+    const paginated = { data: [ENTRY], page: 2, pageSize: 5, total: 11 }
+    const apiGetSpy = vi.spyOn(http, 'apiGet').mockResolvedValue(paginated)
+
+    const result = await fetchActivityLog({ page: 2, pageSize: 5, search: 'nimbus' })
+
+    expect(apiGetSpy).toHaveBeenCalledWith('/activity-log?page=2&pageSize=5&q=nimbus')
+    expect(result).toEqual(paginated)
   })
 })
