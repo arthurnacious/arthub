@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { ROUTES } from '../lib/routes'
 import { useVimNavigation } from '../hooks/use-vim-navigation'
 import { Mnemonic } from './Mnemonic'
+import { Logo } from './Logo'
 import { TopBar } from './TopBar'
 
 // Terminal-style app shell: a bordered sidebar of route links plus the
@@ -18,8 +19,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-1 overflow-hidden">
       <aside className="flex w-56 shrink-0 flex-col overflow-y-auto border-r border-[var(--border)] bg-[var(--panel)]">
-        <div className="glow-text flex h-14 shrink-0 items-center border-b border-[var(--border)] px-4 text-sm font-bold tracking-widest text-[var(--accent)]">
-          ARTHUB<span className="cursor-blink">_</span>
+        <div className="flex h-14 shrink-0 items-center border-b border-[var(--border)] px-4">
+          <Logo className="text-sm" />
         </div>
         <nav className="flex flex-col gap-0.5 p-2">
           {ROUTES.map((route, index) => (

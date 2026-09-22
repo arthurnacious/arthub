@@ -12,7 +12,9 @@ import { ScanlineOverlay } from '../components/ScanlineOverlay'
 import { MatrixRain } from '../components/MatrixRain'
 import { StatusBar } from '../components/StatusBar'
 import { CommandBar } from '../components/CommandBar'
+import { LoadingScreen } from '../components/LoadingScreen'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
+import { useAppReady } from '../hooks/use-app-ready'
 
 import appCss from '../styles.css?url'
 
@@ -47,7 +49,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // Declaration order matters: useSyncThemeColor's effect must register
+  // (and therefore run) before useAppReady's, so --accent is already
+  // correct by the time `ready` flips true and reveals the real app.
   useSyncThemeColor()
+  const ready = useAppReady()
 
   return (
     <html lang="en">
@@ -57,9 +63,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="flex flex-col overflow-hidden">
         <MatrixRain />
         <ScanlineOverlay />
-        <AppShell>{children}</AppShell>
-        <StatusBar />
-        <CommandBar />
+        {ready ? (
+          <>
+            <AppShell>{children}</AppShell>
+            <StatusBar />
+            <CommandBar />
+          </>
+        ) : (
+          <LoadingScreen />
+        )}
         <TanStackDevtools
           config={{
             position: 'bottom-right',
