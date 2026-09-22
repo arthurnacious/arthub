@@ -140,10 +140,12 @@ body {
 }
 
 /* Decorative radar-scope background: a rotating sweep, static range rings
-   and a handful of pulsing "blips" (randomized once per mount in
-   src/components/RadarBackground.tsx). Every animation here only touches
-   transform/opacity, so it's compositor-only and effectively free - no
-   per-frame JS, nothing to cost real frames. */
+   and a handful of "blips" that only light up the instant the sweep line
+   passes their angle, then fade slowly until the next pass (each blip's
+   animation-delay is computed from its angle in RadarBackground.tsx, kept
+   in lockstep with the sweep's rotation period). Every animation here only
+   touches transform/opacity, so it's compositor-only and effectively free
+   - no per-frame JS, nothing to cost real frames. */
 .radar-bg {
   position: fixed;
   inset: 0;
@@ -175,7 +177,11 @@ body {
     transparent 35deg,
     transparent 360deg
   );
-  animation: radar-spin 9s linear infinite;
+  animation-name: radar-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  /* duration is set inline from RadarBackground.tsx's SWEEP_DURATION_S,
+     the single source of truth shared with each blip's delay below */
 }
 
 @keyframes radar-spin {
@@ -188,20 +194,26 @@ body {
   position: absolute;
   border-radius: 9999px;
   background: var(--accent);
-  animation-name: radar-blip-pulse;
+  opacity: 0;
+  animation-name: radar-blip-sweep;
   animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
+  animation-timing-function: ease-out;
+  /* duration/delay set inline per blip, so the flash lands exactly when
+     the sweep's leading edge reaches that blip's angle */
 }
 
-@keyframes radar-blip-pulse {
-  0%,
+@keyframes radar-blip-sweep {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
   100% {
     opacity: 0;
-    transform: scale(0.6);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1);
+    transform: scale(0.75);
   }
 }
 
