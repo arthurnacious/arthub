@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useLocation,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -54,6 +55,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   // correct by the time `ready` flips true and reveals the real app.
   useSyncThemeColor()
   const ready = useAppReady()
+  const { pathname } = useLocation()
+  const isAuthPage = pathname === '/login'
 
   return (
     <html lang="en">
@@ -63,14 +66,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="flex flex-col overflow-hidden">
         <MatrixRain />
         <ScanlineOverlay />
-        {ready ? (
+        {!ready ? (
+          <LoadingScreen />
+        ) : isAuthPage ? (
+          // No sidebar/topbar/status bar chrome for an unauthenticated
+          // page - it'd just show real-app navigation the user can't use
+          // yet, and a UserMenu with no real session to reflect.
+          children
+        ) : (
           <>
             <AppShell>{children}</AppShell>
             <StatusBar />
             <CommandBar />
           </>
-        ) : (
-          <LoadingScreen />
         )}
         <TanStackDevtools
           config={{

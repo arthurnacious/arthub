@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ActivityRouteImport } from './routes/activity'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as InvoicesRouteImport } from './routes/invoices'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as QuotesRouteImport } from './routes/quotes'
@@ -37,6 +38,11 @@ const ClientsRoute = ClientsRouteImport.update({
 const InvoicesRoute = InvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/activity': typeof ActivityRoute
   '/clients': typeof ClientsRouteWithChildren
   '/invoices': typeof InvoicesRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRoute
   '/quotes': typeof QuotesRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/invoices': typeof InvoicesRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRoute
   '/quotes': typeof QuotesRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/activity': typeof ActivityRoute
   '/clients': typeof ClientsRouteWithChildren
   '/invoices': typeof InvoicesRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRoute
   '/quotes': typeof QuotesRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/clients'
     | '/invoices'
+    | '/login'
     | '/profile'
     | '/projects'
     | '/quotes'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/activity'
     | '/invoices'
+    | '/login'
     | '/profile'
     | '/projects'
     | '/quotes'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/activity'
     | '/clients'
     | '/invoices'
+    | '/login'
     | '/profile'
     | '/projects'
     | '/quotes'
@@ -138,6 +150,7 @@ export interface RootRouteChildren {
   ActivityRoute: typeof ActivityRoute
   ClientsRoute: typeof ClientsRouteWithChildren
   InvoicesRoute: typeof InvoicesRoute
+  LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   ProjectsRoute: typeof ProjectsRoute
   QuotesRoute: typeof QuotesRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       path: '/invoices'
       fullPath: '/invoices'
       preLoaderRoute: typeof InvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -229,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   ActivityRoute: ActivityRoute,
   ClientsRoute: ClientsRouteWithChildren,
   InvoicesRoute: InvoicesRoute,
+  LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   ProjectsRoute: ProjectsRoute,
   QuotesRoute: QuotesRoute,

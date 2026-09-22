@@ -1,8 +1,9 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useDismissable } from '../hooks/use-dismissable'
 import { StatusBadge } from './StatusBadge'
 import { MOCK_CURRENT_USER } from '../lib/current-user'
+import { authStore } from '../stores/auth-store'
 
 const MENU_LINK_CLASSES =
   'rounded px-2 py-1 text-left text-[var(--text-dim)] transition-colors hover:bg-[var(--accent-dim)] hover:text-[var(--accent)]'
@@ -10,10 +11,17 @@ const MENU_LINK_CLASSES =
 export function UserMenu() {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
   useDismissable(containerRef, open, () => setOpen(false))
 
   function close() {
     setOpen(false)
+  }
+
+  function logout() {
+    authStore.logout()
+    close()
+    navigate({ to: '/login' })
   }
 
   return (
@@ -41,11 +49,9 @@ export function UserMenu() {
             <Link to="/invoices" className={MENU_LINK_CLASSES} onClick={close}>
               &gt; my invoices
             </Link>
-            {/* Stub until a real session exists to log out of - see
-                MOCK_CURRENT_USER. For now it just closes the menu. */}
             <button
               type="button"
-              onClick={close}
+              onClick={logout}
               className="rounded px-2 py-1 text-left text-red-400 transition-colors hover:bg-red-500/10"
             >
               &gt; logout

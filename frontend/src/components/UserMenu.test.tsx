@@ -7,13 +7,14 @@ import {
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { UserMenu } from './UserMenu'
 import { MOCK_CURRENT_USER } from '../lib/current-user'
+import { authStore } from '../stores/auth-store'
 
 function createTestRouter() {
   const rootRoute = createRootRoute({ component: UserMenu })
-  const routes = ['/', '/profile', '/invoices'].map((path) =>
+  const routes = ['/', '/profile', '/invoices', '/login'].map((path) =>
     createRoute({ getParentRoute: () => rootRoute, path, component: () => null }),
   )
 
@@ -24,6 +25,10 @@ function createTestRouter() {
 }
 
 describe('UserMenu', () => {
+  beforeEach(() => {
+    authStore.login('a-token')
+  })
+
   it('is closed until clicked', async () => {
     const router = createTestRouter()
     render(<RouterProvider router={router} />)
@@ -65,7 +70,7 @@ describe('UserMenu', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/invoices'))
   })
 
-  it('logout closes the menu', async () => {
+  it('logout clears the session and redirects to /login', async () => {
     const user = userEvent.setup()
     const router = createTestRouter()
     render(<RouterProvider router={router} />)
@@ -74,6 +79,8 @@ describe('UserMenu', () => {
     await user.click(screen.getByRole('button', { name: /logout/i }))
 
     expect(screen.queryByText(MOCK_CURRENT_USER.email)).not.toBeInTheDocument()
+    expect(authStore.store.state.token).toBeNull()
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'))
   })
 
   it('closes on Escape', async () => {

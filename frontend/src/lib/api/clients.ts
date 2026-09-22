@@ -1,5 +1,4 @@
-import { MOCK_CLIENTS } from '../mock-clients'
-import { filterClients } from '../filter-clients'
+import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from './http'
 import type { Client } from '../mock-clients'
 
 export interface PaginatedResult<T> {
@@ -15,76 +14,42 @@ export interface FetchClientsParams {
   search: string
 }
 
-// In-memory mock "database", standing in until a real backend + auth flow
-// exist to call it with. Mutated by update/delete below, so changes are
-// visible to subsequent fetches within the session (reset on reload).
-let clientsStore: Client[] = [...MOCK_CLIENTS]
-
-// Test-only: puts the store back to its seed data between tests.
-export function __resetClientsStoreForTests(): void {
-  clientsStore = [...MOCK_CLIENTS]
-}
-
-function networkDelay(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 250))
-}
-
-// Stand-in for a real `GET /clients?page=&pageSize=&q=` call - same async,
-// paginated shape a real fetch() would return, so swapping this out for
-// one (once the endpoint and an auth flow to call it with both exist) is a
-// one-line change in the query that calls it (src/routes/clients.tsx).
-export async function fetchClients({
+// GET /clients?page=&pageSize=&q= - server-side pagination and search, see
+// backend/src/Modules/Clients/ClientsController.php.
+export function fetchClients({
   page,
   pageSize,
   search,
 }: FetchClientsParams): Promise<PaginatedResult<Client>> {
-  await networkDelay()
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+    q: search,
+  })
 
-  const filtered = filterClients(clientsStore, search)
-  const start = (page - 1) * pageSize
-  const data = filtered.slice(start, start + pageSize)
-
-  return { data, page, pageSize, total: filtered.length }
+  return apiGet<PaginatedResult<Client>>(`/clients?${params.toString()}`)
 }
 
-// Stand-in for `POST /clients`.
-export async function createClient(
-  input: Omit<Client, 'id' | 'projects'>,
-): Promise<Client> {
-  await networkDelay()
-
-  const created: Client = { ...input, id: crypto.randomUUID(), projects: 0 }
-  clientsStore = [created, ...clientsStore]
-  return created
-}
-
-// Stand-in for `GET /clients/:id`.
 export async function fetchClient(id: string): Promise<Client | null> {
-  await networkDelay()
-  return clientsStore.find((client) => client.id === id) ?? null
+  try {
+    return await apiGet<Client>(`/clients/${id}`)
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null
+    throw error
+  }
 }
 
-// Stand-in for `PATCH /clients/:id`.
-export async function updateClient(
+export function createClient(input: Omit<Client, 'id' | 'projects'>): Promise<Client> {
+  return apiPost<Client>('/clients', input)
+}
+
+export function updateClient(
   id: string,
   patch: Partial<Omit<Client, 'id'>>,
 ): Promise<Client> {
-  await networkDelay()
-
-  const index = clientsStore.findIndex((client) => client.id === id)
-  if (index === -1) throw new Error(`No client with id ${id}`)
-
-  const updated = { ...clientsStore[index], ...patch }
-  clientsStore = [
-    ...clientsStore.slice(0, index),
-    updated,
-    ...clientsStore.slice(index + 1),
-  ]
-  return updated
+  return apiPatch<Client>(`/clients/${id}`, patch)
 }
 
-// Stand-in for `DELETE /clients/:id`.
 export async function deleteClient(id: string): Promise<void> {
-  await networkDelay()
-  clientsStore = clientsStore.filter((client) => client.id !== id)
+  await apiDelete(`/clients/${id}`)
 }
