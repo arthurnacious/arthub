@@ -7,6 +7,8 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
 
 import appCss from '../styles.css?url'
 
@@ -41,12 +43,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useSyncThemeColor()
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
+        <div className="fixed right-4 top-4 z-50">
+          <ThemeToggle />
+        </div>
         {children}
         <TanStackDevtools
           config={{
