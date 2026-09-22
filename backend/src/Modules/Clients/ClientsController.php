@@ -57,6 +57,12 @@ class ClientsController
 
         $offset = ($page - 1) * $pageSize;
 
+        // Order by id as well as created_at: Postgres's NOW() returns the
+        // enclosing transaction's start time, so multiple clients created
+        // in the same request/transaction can share an identical
+        // created_at, making created_at alone a non-deterministic sort key
+        // (id is a UUIDv7, so it's still time-ordered as a tiebreaker).
+        //
         // LIMIT/OFFSET interpolated directly (not bound) - both are
         // already cast to int above, so there's nothing to inject, and
         // Postgres via PDO can be finicky binding these as typed integers.
@@ -67,7 +73,7 @@ class ClientsController
             LEFT JOIN projects p ON p.client_id = c.id
             {$where}
             GROUP BY c.id
-            ORDER BY c.created_at DESC
+            ORDER BY c.created_at DESC, c.id DESC
             LIMIT {$pageSize} OFFSET {$offset}
         SQL);
         $statement->execute($params);
