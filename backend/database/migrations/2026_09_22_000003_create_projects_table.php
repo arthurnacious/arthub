@@ -14,8 +14,8 @@ return new class ($pdo) extends Migration {
             CREATE TYPE project_status AS ENUM ('active', 'completed', 'archived');
 
             CREATE TABLE projects (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER NOT NULL REFERENCES clients (id) ON DELETE CASCADE,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                client_id UUID NOT NULL REFERENCES clients (id) ON DELETE CASCADE,
                 name VARCHAR(255) NOT NULL,
                 description TEXT NULL,
                 status project_status NOT NULL DEFAULT 'active',

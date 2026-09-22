@@ -14,9 +14,9 @@ return new class ($pdo) extends Migration {
             CREATE TYPE invoice_status AS ENUM ('draft', 'sent', 'paid', 'overdue', 'cancelled');
 
             CREATE TABLE invoices (
-                id SERIAL PRIMARY KEY,
-                project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
-                quote_id INTEGER NULL REFERENCES quotes (id) ON DELETE SET NULL,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+                quote_id UUID NULL REFERENCES quotes (id) ON DELETE SET NULL,
                 invoice_number VARCHAR(50) NOT NULL UNIQUE,
                 status invoice_status NOT NULL DEFAULT 'draft',
                 issue_date DATE NULL,

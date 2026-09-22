@@ -17,8 +17,8 @@ return new class ($pdo) extends Migration {
             CREATE TYPE quote_status AS ENUM ('draft', 'sent', 'accepted', 'rejected', 'expired');
 
             CREATE TABLE quotes (
-                id SERIAL PRIMARY KEY,
-                project_id INTEGER NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
                 quote_number VARCHAR(50) NOT NULL UNIQUE,
                 status quote_status NOT NULL DEFAULT 'draft',
                 issue_date DATE NULL,

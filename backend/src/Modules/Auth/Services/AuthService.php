@@ -29,10 +29,10 @@ class AuthService
             return null;
         }
 
-        $this->activity->log('auth.login', "{$user['name']} logged in", (int) $user['id']);
+        $this->activity->log('auth.login', "{$user['name']} logged in", $user['id']);
 
         return $this->jwt->encode([
-            'sub' => (int) $user['id'],
+            'sub' => $user['id'], // UUID
             'email' => $user['email'],
             'role' => $user['role'],
         ]);
@@ -53,7 +53,7 @@ class AuthService
     /**
      * @return array<string, mixed>|null
      */
-    public function findById(int $id): ?array
+    public function findById(string $id): ?array
     {
         $statement = $this->connection->pdo()->prepare('SELECT * FROM users WHERE id = :id');
         $statement->execute(['id' => $id]);
@@ -73,7 +73,7 @@ class AuthService
     public function createPasswordResetToken(array $user): string
     {
         return $this->jwt->encode([
-            'sub' => (int) $user['id'],
+            'sub' => $user['id'], // UUID
             'purpose' => 'password-reset',
             'exp' => time() + 900, // 15 minutes
         ]);
@@ -96,10 +96,10 @@ class AuthService
         );
         $statement->execute([
             'hash' => password_hash($newPassword, PASSWORD_BCRYPT),
-            'id' => (int) $payload['sub'],
+            'id' => $payload['sub'],
         ]);
 
-        $this->activity->log('auth.password_reset', 'Password was reset', (int) $payload['sub']);
+        $this->activity->log('auth.password_reset', 'Password was reset', $payload['sub']);
 
         return true;
     }

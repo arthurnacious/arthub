@@ -21,9 +21,9 @@ class ActivityLogger
     public function log(
         string $action,
         string $description,
-        ?int $userId = null,
+        ?string $userId = null, // users.id is a UUID
         ?string $subjectType = null,
-        ?int $subjectId = null,
+        ?string $subjectId = null, // every table's id in this schema is a UUID
         ?array $metadata = null,
     ): void {
         $statement = $this->connection->pdo()->prepare(<<<SQL

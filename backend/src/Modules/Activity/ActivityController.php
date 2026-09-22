@@ -23,10 +23,14 @@ class ActivityController
     #[Get]
     public function index(): Response
     {
+        // Order by id as well as created_at: Postgres's NOW() returns the
+        // enclosing transaction's start time, so multiple log() calls in
+        // the same request/transaction can share an identical created_at,
+        // making created_at alone a non-deterministic sort key.
         $statement = $this->connection->pdo()->query(<<<SQL
             SELECT id, user_id, action, description, subject_type, subject_id, metadata, created_at
             FROM activity_log
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, id DESC
             LIMIT 100
         SQL);
 
