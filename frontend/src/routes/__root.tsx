@@ -9,7 +9,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { AppShell } from '../components/AppShell'
 import { ScanlineOverlay } from '../components/ScanlineOverlay'
-import { RadarBackground } from '../components/RadarBackground'
+import { MatrixRain } from '../components/MatrixRain'
 import { StatusBar } from '../components/StatusBar'
 import { CommandBar } from '../components/CommandBar'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: import.meta.env.VITE_SITE_NAME ?? 'Arthub',
       },
     ],
     links: [
@@ -55,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="flex flex-col overflow-hidden">
-        <RadarBackground />
+        <MatrixRain />
         <ScanlineOverlay />
         <AppShell>{children}</AppShell>
         <StatusBar />
