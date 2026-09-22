@@ -10,6 +10,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { AppShell } from '../components/AppShell'
 import { ScanlineOverlay } from '../components/ScanlineOverlay'
 import { RadarBackground } from '../components/RadarBackground'
+import { StatusBar } from '../components/StatusBar'
 import { CommandBar } from '../components/CommandBar'
 import { useSyncThemeColor } from '../hooks/use-sync-theme-color'
 
@@ -53,10 +54,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <RadarBackground />
         <ScanlineOverlay />
         <AppShell>{children}</AppShell>
+        <StatusBar />
         <CommandBar />
         <TanStackDevtools
           config={{
