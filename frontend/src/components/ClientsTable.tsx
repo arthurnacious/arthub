@@ -27,10 +27,10 @@ export function ClientsTable({
       <thead>
         <tr className="border-b border-[var(--border)] text-xs uppercase tracking-wider text-[var(--text-dim)]">
           <th className="py-2 pr-4 font-normal">Company</th>
-          <th className="py-2 pr-4 font-normal">Contact</th>
-          <th className="py-2 pr-4 font-normal">Email</th>
+          <th className="hidden py-2 pr-4 font-normal md:table-cell">Contact</th>
+          <th className="hidden py-2 pr-4 font-normal sm:table-cell">Email</th>
           <th className="py-2 pr-4 font-normal">Status</th>
-          <th className="py-2 pr-4 text-right font-normal">Projects</th>
+          <th className="hidden py-2 pr-4 text-right font-normal md:table-cell">Projects</th>
           <th className="py-2 text-right font-normal" aria-label="Actions" />
         </tr>
       </thead>
@@ -41,12 +41,14 @@ export function ClientsTable({
             className="border-b border-[var(--border)] transition-colors hover:bg-[var(--accent-dim)]"
           >
             <td className="py-2 pr-4 text-[var(--text)]">{client.company}</td>
-            <td className="py-2 pr-4 text-[var(--text-dim)]">{client.contact}</td>
-            <td className="py-2 pr-4 text-[var(--text-dim)]">{client.email}</td>
+            <td className="hidden py-2 pr-4 text-[var(--text-dim)] md:table-cell">{client.contact}</td>
+            <td className="hidden py-2 pr-4 text-[var(--text-dim)] sm:table-cell">{client.email}</td>
             <td className="py-2 pr-4">
               <StatusBadge label={client.status} tone={CLIENT_STATUS_TONE[client.status]} />
             </td>
-            <td className="py-2 pr-4 text-right text-[var(--text-dim)]">{client.projects}</td>
+            <td className="hidden py-2 pr-4 text-right text-[var(--text-dim)] md:table-cell">
+              {client.projects}
+            </td>
             <td className="py-2 text-right">
               <RowActionsMenu
                 item={client}

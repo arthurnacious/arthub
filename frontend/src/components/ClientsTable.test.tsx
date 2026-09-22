@@ -44,4 +44,20 @@ describe('ClientsTable', () => {
 
     expect(onView).toHaveBeenCalledWith(CLIENTS[1])
   })
+
+  it('hides the least essential columns below their breakpoint, keeping company/status/actions always visible', () => {
+    const { container } = render(<ClientsTable clients={CLIENTS} {...NOOP_ACTIONS} />)
+
+    const headerCells = container.querySelectorAll('thead th')
+    const [company, contact, email, status] = Array.from(headerCells).map(
+      (cell) => cell.className,
+    )
+
+    expect(company).not.toContain('hidden')
+    expect(contact).toContain('hidden')
+    expect(contact).toContain('md:table-cell')
+    expect(email).toContain('hidden')
+    expect(email).toContain('sm:table-cell')
+    expect(status).not.toContain('hidden')
+  })
 })
