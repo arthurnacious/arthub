@@ -148,89 +148,19 @@ body {
   }
 }
 
-/* Decorative radar-scope background: a rotating sweep, static range rings
-   and a handful of "blips" that only light up the instant the sweep line
-   passes their angle, then fade slowly until the next pass (each blip's
-   animation-delay is computed from its angle in RadarBackground.tsx, kept
-   in lockstep with the sweep's rotation period). Every animation here only
-   touches transform/opacity, so it's compositor-only and effectively free
-   - no per-frame JS, nothing to cost real frames. */
-.radar-bg {
+/* Matrix-style digital rain background. Rendered on a <canvas> (see
+   src/components/MatrixRain.tsx) - the canvas itself just needs to sit
+   full-viewport, behind everything, non-interactive. */
+.matrix-rain {
   position: fixed;
   inset: 0;
-  z-index: 0;
-  overflow: hidden;
+  /* Negative, not 0: a `position: fixed` element paints above normal,
+     non-positioned content regardless of z-index >= 0 (that's just how
+     the CSS stacking order works), so 0 was letting this show through in
+     front of the sidebar/topbar/cards. Negative puts it in the layer that
+     paints below all of that. */
+  z-index: -1;
   pointer-events: none;
-  opacity: 0.6;
-}
-
-.radar-rings {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-radial-gradient(
-    circle at 50% 50%,
-    var(--grid-line) 0px,
-    var(--grid-line) 1px,
-    transparent 1px,
-    transparent 110px
-  );
-}
-
-.radar-sweep {
-  position: absolute;
-  inset: -50%;
-  transform-origin: center;
-  background: conic-gradient(
-    from 0deg,
-    var(--accent-dim) 0deg,
-    transparent 35deg,
-    transparent 360deg
-  );
-  animation-name: radar-spin;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  /* duration is set inline from RadarBackground.tsx's SWEEP_DURATION_S,
-     the single source of truth shared with each blip's delay below */
-}
-
-@keyframes radar-spin {
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-.radar-blip {
-  position: absolute;
-  border-radius: 9999px;
-  background: var(--accent);
-  opacity: 0;
-  animation-name: radar-blip-sweep;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-out;
-  /* duration/delay set inline per blip (RadarBackground.tsx), so the
-     flash lands exactly when the anticlockwise sweep reaches that blip's
-     angle, then fades in its wake */
-}
-
-@keyframes radar-blip-sweep {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  60% {
-    opacity: 0;
-    transform: scale(0.75);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.75);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .radar-sweep,
-  .radar-blip {
-    animation: none;
-  }
+  opacity: 0.18;
 }
 
