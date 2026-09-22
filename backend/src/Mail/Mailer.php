@@ -31,7 +31,9 @@ class Mailer
         );
     }
 
-    private function send(string $toEmail, string $toName, string $subject, string $body): void
+    // protected (not private) so tests can subclass Mailer with a fake
+    // send() that records calls instead of hitting real SMTP.
+    protected function send(string $toEmail, string $toName, string $subject, string $body): void
     {
         $config = Config::get('mail');
 

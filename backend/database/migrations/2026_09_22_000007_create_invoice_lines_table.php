@@ -13,8 +13,8 @@ return new class ($pdo) extends Migration {
     {
         $this->pdo->exec(<<<SQL
             CREATE TABLE invoice_lines (
-                id SERIAL PRIMARY KEY,
-                invoice_id INTEGER NOT NULL REFERENCES invoices (id) ON DELETE CASCADE,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                invoice_id UUID NOT NULL REFERENCES invoices (id) ON DELETE CASCADE,
                 description TEXT NOT NULL,
                 quantity NUMERIC(12, 2) NOT NULL DEFAULT 1,
                 unit_price NUMERIC(12, 2) NOT NULL DEFAULT 0,

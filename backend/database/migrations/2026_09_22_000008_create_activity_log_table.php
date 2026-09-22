@@ -13,12 +13,12 @@ return new class ($pdo) extends Migration {
     {
         $this->pdo->exec(<<<SQL
             CREATE TABLE activity_log (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NULL REFERENCES users (id) ON DELETE SET NULL,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                user_id UUID NULL REFERENCES users (id) ON DELETE SET NULL,
                 action VARCHAR(100) NOT NULL,
                 description TEXT NOT NULL,
                 subject_type VARCHAR(100) NULL,
-                subject_id INTEGER NULL,
+                subject_id UUID NULL,
                 metadata JSONB NULL,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );

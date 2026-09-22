@@ -12,8 +12,8 @@ return new class ($pdo) extends Migration {
     {
         $this->pdo->exec(<<<SQL
             CREATE TABLE quote_lines (
-                id SERIAL PRIMARY KEY,
-                quote_id INTEGER NOT NULL REFERENCES quotes (id) ON DELETE CASCADE,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
+                quote_id UUID NOT NULL REFERENCES quotes (id) ON DELETE CASCADE,
                 description TEXT NOT NULL,
                 quantity NUMERIC(12, 2) NOT NULL DEFAULT 1,
                 unit_price NUMERIC(12, 2) NOT NULL DEFAULT 0,

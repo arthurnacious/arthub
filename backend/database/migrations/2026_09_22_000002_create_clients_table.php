@@ -8,12 +8,16 @@ use App\Database\Migration;
 // login (users.client_id) for a client portal, but that's not required -
 // most clients will just be a record you bill against with no login at
 // all.
+//
+// id is a UUIDv7 (see 2026_09_22_000001_create_users_table.php for why) -
+// every table's id in this schema is, so all of them stay consistent and
+// none of the FKs between them end up mismatched.
 return new class ($pdo) extends Migration {
     public function up(): void
     {
         $this->pdo->exec(<<<SQL
             CREATE TABLE clients (
-                id SERIAL PRIMARY KEY,
+                id UUID PRIMARY KEY DEFAULT uuidv7(),
                 company_name VARCHAR(255) NOT NULL,
                 contact_name VARCHAR(255) NULL,
                 email VARCHAR(255) NULL,

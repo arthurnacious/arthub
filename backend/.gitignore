@@ -5,6 +5,7 @@
 
 # Environment
 .env
+.env.testing
 
 # Runtime / cache
 /cache/
