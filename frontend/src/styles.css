@@ -195,7 +195,7 @@ body {
 
 @keyframes radar-spin {
   to {
-    transform: rotate(360deg);
+    transform: rotate(-360deg);
   }
 }
 
@@ -207,8 +207,9 @@ body {
   animation-name: radar-blip-sweep;
   animation-iteration-count: infinite;
   animation-timing-function: ease-out;
-  /* duration/delay set inline per blip, so the flash lands exactly when
-     the sweep's leading edge reaches that blip's angle */
+  /* duration/delay set inline per blip (RadarBackground.tsx), so the
+     flash lands exactly when the anticlockwise sweep reaches that blip's
+     angle, then fades in its wake */
 }
 
 @keyframes radar-blip-sweep {

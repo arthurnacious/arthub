@@ -28,7 +28,11 @@ function randomBlips(count: number): Blip[] {
     const leftPct = Math.round(Math.random() * 100)
     const topPct = Math.round(Math.random() * 100)
     const angle = angleFromCenter(leftPct, topPct)
-    const delay = (angle / 360) * SWEEP_DURATION_S
+    // The sweep now rotates anticlockwise (radar-spin: rotate(-360deg)), so
+    // a blip's angle is reached in the opposite order - mirror the delay
+    // around the period to match (the extra % 360 keeps angle=0 at
+    // delay=0 instead of a full, equivalent-but-untidy period later).
+    const delay = (SWEEP_DURATION_S * ((360 - angle) % 360)) / 360
 
     return {
       id,
