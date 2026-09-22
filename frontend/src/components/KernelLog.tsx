@@ -13,15 +13,13 @@ const LEVEL_CLASSES: Record<KernelLogLevel, string> = {
   error: 'text-red-400',
 }
 
-// A scrolling, terminal-style panel of recent activity. Presentational only
-// so it can be fed either mock entries (for now) or real ones from the
-// /activity endpoint once the frontend has auth wired up.
+// A scrolling, terminal-style feed of recent activity. Presentational only
+// (fed mock entries for now, real ones from GET /activity-log once the
+// frontend has auth wired up), and chrome-free - meant to sit inside a
+// <Panel title="kernel_log">.
 export function KernelLog({ entries }: { entries: KernelLogEntry[] }) {
   return (
-    <div className="glow-border rounded border border-[var(--border)] bg-[var(--panel)] p-4">
-      <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--text-dim)]">
-        kernel_log
-      </div>
+    <>
       {entries.length === 0 ? (
         <p className="text-sm text-[var(--text-dim)]">-- no entries --</p>
       ) : (
@@ -42,6 +40,6 @@ export function KernelLog({ entries }: { entries: KernelLogEntry[] }) {
         <span>&gt;</span>
         <span className="cursor-blink">_</span>
       </div>
-    </div>
+    </>
   )
 }
