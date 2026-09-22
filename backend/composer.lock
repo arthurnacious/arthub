@@ -74,12 +74,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/arthurnacious/hyperdrive.git",
-                "reference": "d7027bc37eb8c5a0dcd3a891a944d4d8f1a9de30"
+                "reference": "65df17a1882091f2e0733548c5ed4c9746c86197"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arthurnacious/hyperdrive/zipball/d7027bc37eb8c5a0dcd3a891a944d4d8f1a9de30",
-                "reference": "d7027bc37eb8c5a0dcd3a891a944d4d8f1a9de30",
+                "url": "https://api.github.com/repos/arthurnacious/hyperdrive/zipball/65df17a1882091f2e0733548c5ed4c9746c86197",
+                "reference": "65df17a1882091f2e0733548c5ed4c9746c86197",
                 "shasum": ""
             },
             "require": {
@@ -100,12 +100,15 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
             "description": "Hyperdrive - PHP Framework inspired by NestJS with OpenSwoole",
             "support": {
                 "issues": "https://github.com/arthurnacious/hyperdrive/issues",
                 "source": "https://github.com/arthurnacious/hyperdrive/tree/master"
             },
-            "time": "2026-09-22T13:30:17+00:00"
+            "time": "2026-09-22T14:11:23+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
