@@ -93,3 +93,28 @@ function create_test_user(
 
     return $statement->fetchColumn();
 }
+
+/**
+ * Inserts a client row and returns its id (a UUID string).
+ */
+function create_test_client(
+    string $company = 'Test Co',
+    string $contact = 'Test Contact',
+    string $email = 'client@example.com',
+    string $status = 'active',
+): string {
+    $statement = test_connection()->pdo()->prepare(<<<SQL
+        INSERT INTO clients (company_name, contact_name, email, status)
+        VALUES (:company_name, :contact_name, :email, :status)
+        RETURNING id
+    SQL);
+
+    $statement->execute([
+        'company_name' => $company,
+        'contact_name' => $contact,
+        'email' => $email,
+        'status' => $status,
+    ]);
+
+    return $statement->fetchColumn();
+}

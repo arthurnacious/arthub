@@ -68,3 +68,31 @@ it('fails with a clear message when ADMIN_EMAIL/ADMIN_PASSWORD are not set', fun
     expect($tester->getStatusCode())->toBe(1)
         ->and($tester->getDisplay())->toContain('ADMIN_EMAIL');
 });
+
+it('seeds sample clients', function () {
+    $_ENV['ADMIN_EMAIL'] = 'seed-admin@example.com';
+    $_ENV['ADMIN_PASSWORD'] = 'seed-password';
+
+    $tester = run_seed_command();
+
+    expect($tester->getStatusCode())->toBe(0)
+        ->and($tester->getDisplay())->toContain('Seeded 6 clients');
+
+    $count = test_connection()->pdo()->query('SELECT COUNT(*) FROM clients')->fetchColumn();
+    expect((int) $count)->toBe(6);
+});
+
+it('does nothing if clients already exist', function () {
+    create_test_client(company: 'Already Here', email: 'already-here-client@test.com');
+
+    $_ENV['ADMIN_EMAIL'] = 'seed-admin@example.com';
+    $_ENV['ADMIN_PASSWORD'] = 'seed-password';
+
+    $tester = run_seed_command();
+
+    expect($tester->getStatusCode())->toBe(0)
+        ->and($tester->getDisplay())->toContain('Clients already seeded');
+
+    $count = test_connection()->pdo()->query('SELECT COUNT(*) FROM clients')->fetchColumn();
+    expect((int) $count)->toBe(1);
+});
