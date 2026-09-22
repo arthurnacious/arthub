@@ -23,7 +23,7 @@ export function StatusBar() {
   }, [])
 
   return (
-    <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-[var(--border)] bg-[var(--panel)] px-4 py-1 text-xs text-[var(--text-dim)]">
+    <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-[var(--border)] bg-[var(--panel)] px-4 py-1 text-xs text-[var(--text-dim)]">
       <span>
         arthub <span className="text-[var(--accent)]">v0.1.0</span>
       </span>

@@ -54,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex flex-col overflow-hidden">
         <RadarBackground />
         <ScanlineOverlay />
         <AppShell>{children}</AppShell>
