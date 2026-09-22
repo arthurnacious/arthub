@@ -18,7 +18,7 @@ const LEVEL_CLASSES: Record<KernelLogLevel, string> = {
 // /activity endpoint once the frontend has auth wired up.
 export function KernelLog({ entries }: { entries: KernelLogEntry[] }) {
   return (
-    <div className="rounded border border-[var(--border)] bg-[var(--panel)] p-4">
+    <div className="glow-border rounded border border-[var(--border)] bg-[var(--panel)] p-4">
       <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--text-dim)]">
         kernel_log
       </div>
@@ -38,6 +38,10 @@ export function KernelLog({ entries }: { entries: KernelLogEntry[] }) {
           ))}
         </ul>
       )}
+      <div className="mt-2 flex gap-1 text-sm text-[var(--accent)]">
+        <span>&gt;</span>
+        <span className="cursor-blink">_</span>
+      </div>
     </div>
   )
 }

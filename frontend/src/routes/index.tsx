@@ -12,7 +12,7 @@ const MOCK_ENTRIES = [
 function Home() {
   return (
     <div>
-      <h1 className="text-lg font-bold text-[var(--accent)]">DASHBOARD</h1>
+      <h1 className="glow-text text-lg font-bold text-[var(--accent)]">DASHBOARD</h1>
       <p className="mt-2 text-sm text-[var(--text-dim)]">
         // coming soon: an overview of clients, projects and recent activity
       </p>
