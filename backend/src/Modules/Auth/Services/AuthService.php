@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Services;
 
 use App\Database\Connection;
-use App\Support\ActivityLogger;
+use App\Events\PasswordWasReset;
+use App\Events\UserLoggedIn;
+use Hyperdrive\Events\EventDispatcher;
 use Hyperdrive\Security\JwtService;
 use Throwable;
 
@@ -14,7 +16,7 @@ class AuthService
     public function __construct(
         private readonly Connection $connection,
         private readonly JwtService $jwt,
-        private readonly ActivityLogger $activity,
+        private readonly EventDispatcher $events,
     ) {
     }
 
@@ -29,7 +31,7 @@ class AuthService
             return null;
         }
 
-        $this->activity->log('auth.login', "{$user['name']} logged in", $user['id']);
+        $this->events->dispatch(new UserLoggedIn(userId: $user['id'], name: $user['name']));
 
         return $this->jwt->encode([
             'sub' => $user['id'], // UUID
@@ -99,7 +101,7 @@ class AuthService
             'id' => $payload['sub'],
         ]);
 
-        $this->activity->log('auth.password_reset', 'Password was reset', $payload['sub']);
+        $this->events->dispatch(new PasswordWasReset(userId: $payload['sub']));
 
         return true;
     }

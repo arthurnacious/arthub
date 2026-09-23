@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Modules\Projects;
 
 use App\Database\Connection;
+use App\Events\ProjectCreated;
+use App\Events\ProjectDeleted;
+use App\Events\ProjectUpdated;
 use App\Modules\Auth\Middleware\AuthenticateMiddleware;
 use App\Modules\Projects\Dto\CreateProjectDto;
 use App\Modules\Projects\Dto\UpdateProjectDto;
-use App\Support\ActivityLogger;
 use Hyperdrive\Attributes\Http\Route;
 use Hyperdrive\Attributes\Http\Verbs\Delete;
 use Hyperdrive\Attributes\Http\Verbs\Get;
 use Hyperdrive\Attributes\Http\Verbs\Patch;
 use Hyperdrive\Attributes\Http\Verbs\Post;
 use Hyperdrive\Attributes\Middleware;
+use Hyperdrive\Events\EventDispatcher;
 use Hyperdrive\Http\Request;
 use Hyperdrive\Http\Response;
 
@@ -33,7 +36,7 @@ class ProjectsController
 
     public function __construct(
         private readonly Connection $connection,
-        private readonly ActivityLogger $activityLogger,
+        private readonly EventDispatcher $events,
     ) {
     }
 
@@ -148,13 +151,11 @@ class ProjectsController
         ]);
         $id = $statement->fetchColumn();
 
-        $this->activityLogger->log(
-            action: 'project.created',
-            description: "Created project {$dto->name}",
+        $this->events->dispatch(new ProjectCreated(
+            projectId: $id,
+            name: $dto->name,
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'project',
-            subjectId: $id,
-        );
+        ));
 
         return Response::json($this->presentDetail($this->find($id)), 201);
     }
@@ -194,13 +195,11 @@ class ProjectsController
             'status' => $dto->status,
         ]);
 
-        $this->activityLogger->log(
-            action: 'project.updated',
-            description: "Updated project {$dto->name}",
+        $this->events->dispatch(new ProjectUpdated(
+            projectId: $id,
+            name: $dto->name,
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'project',
-            subjectId: $id,
-        );
+        ));
 
         return Response::json($this->presentDetail($this->find($id)));
     }
@@ -224,13 +223,11 @@ class ProjectsController
         // project_images rows cascade-delete via the FK.
         $pdo->prepare('DELETE FROM projects WHERE id = :id')->execute(['id' => $id]);
 
-        $this->activityLogger->log(
-            action: 'project.deleted',
-            description: "Deleted project {$project['name']}",
+        $this->events->dispatch(new ProjectDeleted(
+            projectId: $id,
+            name: $project['name'],
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'project',
-            subjectId: $id,
-        );
+        ));
 
         return Response::json(['message' => 'Project deleted']);
     }

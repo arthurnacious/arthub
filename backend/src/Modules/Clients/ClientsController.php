@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Modules\Clients;
 
 use App\Database\Connection;
+use App\Events\ClientCreated;
+use App\Events\ClientDeleted;
+use App\Events\ClientUpdated;
 use App\Modules\Auth\Middleware\AuthenticateMiddleware;
 use App\Modules\Clients\Dto\CreateClientDto;
 use App\Modules\Clients\Dto\UpdateClientDto;
-use App\Support\ActivityLogger;
 use Hyperdrive\Attributes\Http\Route;
 use Hyperdrive\Attributes\Http\Verbs\Delete;
 use Hyperdrive\Attributes\Http\Verbs\Get;
 use Hyperdrive\Attributes\Http\Verbs\Patch;
 use Hyperdrive\Attributes\Http\Verbs\Post;
 use Hyperdrive\Attributes\Middleware;
+use Hyperdrive\Events\EventDispatcher;
 use Hyperdrive\Http\Request;
 use Hyperdrive\Http\Response;
 
@@ -31,7 +34,7 @@ class ClientsController
 
     public function __construct(
         private readonly Connection $connection,
-        private readonly ActivityLogger $activityLogger,
+        private readonly EventDispatcher $events,
     ) {
     }
 
@@ -119,13 +122,11 @@ class ClientsController
         $client = $statement->fetch();
         $client['projects_count'] = 0;
 
-        $this->activityLogger->log(
-            action: 'client.created',
-            description: "Created client {$dto->company}",
+        $this->events->dispatch(new ClientCreated(
+            clientId: $client['id'],
+            company: $dto->company,
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'client',
-            subjectId: $client['id'],
-        );
+        ));
 
         return Response::json($this->present($client), 201);
     }
@@ -155,13 +156,11 @@ class ClientsController
             'status' => $dto->status,
         ]);
 
-        $this->activityLogger->log(
-            action: 'client.updated',
-            description: "Updated client {$dto->company}",
+        $this->events->dispatch(new ClientUpdated(
+            clientId: $id,
+            company: $dto->company,
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'client',
-            subjectId: $id,
-        );
+        ));
 
         return Response::json($this->present($this->find($id)));
     }
@@ -177,13 +176,11 @@ class ClientsController
         $statement = $this->connection->pdo()->prepare('DELETE FROM clients WHERE id = :id');
         $statement->execute(['id' => $id]);
 
-        $this->activityLogger->log(
-            action: 'client.deleted',
-            description: "Deleted client {$client['company_name']}",
+        $this->events->dispatch(new ClientDeleted(
+            clientId: $id,
+            company: $client['company_name'],
             userId: $request->getAttribute('auth_user')['sub'] ?? null,
-            subjectType: 'client',
-            subjectId: $id,
-        );
+        ));
 
         return Response::json(['message' => 'Client deleted']);
     }

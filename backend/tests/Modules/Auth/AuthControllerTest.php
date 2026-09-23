@@ -7,14 +7,13 @@ use App\Modules\Auth\Dto\ForgotPasswordDto;
 use App\Modules\Auth\Dto\LoginDto;
 use App\Modules\Auth\Dto\ResetPasswordDto;
 use App\Modules\Auth\Services\AuthService;
-use App\Support\ActivityLogger;
 use Hyperdrive\Security\JwtService;
 use Tests\Doubles\FakeMailer;
 
 function make_auth_controller(): array
 {
     $mailer = new FakeMailer;
-    $auth = new AuthService(test_connection(), new JwtService, new ActivityLogger(test_connection()));
+    $auth = new AuthService(test_connection(), new JwtService, make_event_dispatcher());
 
     return [new AuthController($auth, $mailer), $auth, $mailer];
 }

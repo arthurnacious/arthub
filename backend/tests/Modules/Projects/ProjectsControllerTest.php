@@ -5,12 +5,11 @@ declare(strict_types=1);
 use App\Modules\Projects\Dto\CreateProjectDto;
 use App\Modules\Projects\Dto\UpdateProjectDto;
 use App\Modules\Projects\ProjectsController;
-use App\Support\ActivityLogger;
 use Hyperdrive\Http\Request;
 
 function make_projects_controller(): ProjectsController
 {
-    return new ProjectsController(test_connection(), new ActivityLogger(test_connection()));
+    return new ProjectsController(test_connection(), make_event_dispatcher());
 }
 
 function make_test_upload(string $name, string $mime, string $contents = 'fake-image-bytes'): array

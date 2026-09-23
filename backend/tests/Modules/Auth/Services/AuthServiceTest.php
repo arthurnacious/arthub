@@ -3,12 +3,11 @@
 declare(strict_types=1);
 
 use App\Modules\Auth\Services\AuthService;
-use App\Support\ActivityLogger;
 use Hyperdrive\Security\JwtService;
 
 function make_auth_service(): AuthService
 {
-    return new AuthService(test_connection(), new JwtService, new ActivityLogger(test_connection()));
+    return new AuthService(test_connection(), new JwtService, make_event_dispatcher());
 }
 
 it('returns a JWT for correct credentials', function () {

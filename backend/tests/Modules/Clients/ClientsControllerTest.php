@@ -5,12 +5,11 @@ declare(strict_types=1);
 use App\Modules\Clients\ClientsController;
 use App\Modules\Clients\Dto\CreateClientDto;
 use App\Modules\Clients\Dto\UpdateClientDto;
-use App\Support\ActivityLogger;
 use Hyperdrive\Http\Request;
 
 function make_clients_controller(): ClientsController
 {
-    return new ClientsController(test_connection(), new ActivityLogger(test_connection()));
+    return new ClientsController(test_connection(), make_event_dispatcher());
 }
 
 it('lists clients newest first, with pagination metadata', function () {

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Database\Connection;
 use App\Database\Migrator;
+use App\Modules\Activity\Listeners\ActivityLogListener;
+use Hyperdrive\Container\Container;
+use Hyperdrive\Events\EventDispatcher;
 use Tests\TestCase;
 
 /*
@@ -67,6 +70,26 @@ uses(TestCase::class)->in(__DIR__);
 | Shared fixtures
 |--------------------------------------------------------------------------
 */
+
+/**
+ * A real EventDispatcher wired the same way Hyperdrive wires one at boot -
+ * except pointed at test_connection() (so anything ActivityLogListener
+ * writes lands in this test's transaction and gets rolled back with
+ * everything else) instead of a fresh Connection. Controllers/services
+ * under test take an EventDispatcher in their constructor now instead of
+ * an ActivityLogger directly, so this is what test helpers like
+ * make_clients_controller() pass in.
+ */
+function make_event_dispatcher(): EventDispatcher
+{
+    $container = new Container();
+    $container->instance(Connection::class, test_connection());
+
+    $dispatcher = new EventDispatcher($container);
+    $dispatcher->registerListenerClass(ActivityLogListener::class);
+
+    return $dispatcher;
+}
 
 /**
  * Inserts a user row (inside the current test's transaction, so it's rolled
