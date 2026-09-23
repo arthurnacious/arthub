@@ -296,6 +296,15 @@ function QuoteDetailPage() {
                 >
                   delete
                 </button>
+                {quote.status === 'accepted' && (
+                  <Link
+                    to="/invoices"
+                    search={{ page: 1, q: '', status: '', fromQuote: quote.id }}
+                    className={`${BUTTON_CLASSES} border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-dim)]`}
+                  >
+                    convert to invoice
+                  </Link>
+                )}
               </div>
             </div>
           )}
