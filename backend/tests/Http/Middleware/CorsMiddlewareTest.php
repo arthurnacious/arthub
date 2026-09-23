@@ -43,3 +43,59 @@ it('preserves headers already set on the response', function () {
 
     expect($response->getHeaders())->toHaveKey('X-Custom', 'value');
 });
+
+it('echoes back whichever configured origin the request actually came from', function () {
+    Config::set('cors.allowed_origin', 'http://localhost:3000,http://192.168.0.170:3000');
+
+    $finalHandler = new class implements RequestHandlerInterface {
+        public function handle(Request $request): Response
+        {
+            return new Response('hello', 200);
+        }
+    };
+
+    $fromLan = (new CorsMiddleware)->handle(
+        new Request(server: ['HTTP_ORIGIN' => 'http://192.168.0.170:3000']),
+        $finalHandler,
+    );
+    $fromLocalhost = (new CorsMiddleware)->handle(
+        new Request(server: ['HTTP_ORIGIN' => 'http://localhost:3000']),
+        $finalHandler,
+    );
+
+    expect($fromLan->getHeaders()['Access-Control-Allow-Origin'])->toBe('http://192.168.0.170:3000')
+        ->and($fromLocalhost->getHeaders()['Access-Control-Allow-Origin'])->toBe('http://localhost:3000');
+});
+
+it('falls back to the first configured origin for a request Origin not in the list', function () {
+    Config::set('cors.allowed_origin', 'http://localhost:3000,http://192.168.0.170:3000');
+
+    $finalHandler = new class implements RequestHandlerInterface {
+        public function handle(Request $request): Response
+        {
+            return new Response('hello', 200);
+        }
+    };
+
+    $response = (new CorsMiddleware)->handle(
+        new Request(server: ['HTTP_ORIGIN' => 'https://evil.example']),
+        $finalHandler,
+    );
+
+    expect($response->getHeaders()['Access-Control-Allow-Origin'])->toBe('http://localhost:3000');
+});
+
+it('falls back to the first configured origin when the request has no Origin header at all', function () {
+    Config::set('cors.allowed_origin', 'http://localhost:3000,http://192.168.0.170:3000');
+
+    $finalHandler = new class implements RequestHandlerInterface {
+        public function handle(Request $request): Response
+        {
+            return new Response('hello', 200);
+        }
+    };
+
+    $response = (new CorsMiddleware)->handle(new Request, $finalHandler);
+
+    expect($response->getHeaders()['Access-Control-Allow-Origin'])->toBe('http://localhost:3000');
+});
