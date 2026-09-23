@@ -19,6 +19,8 @@ import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as QuotesRouteImport } from './routes/quotes'
 import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
+import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
+import { Route as InvoicesInvoiceIdRouteImport } from './routes/invoices.$invoiceId'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as QuotesIndexRouteImport } from './routes/quotes.index'
@@ -74,6 +76,16 @@ const ClientsClientIdRoute = ClientsClientIdRouteImport.update({
   path: '/$clientId',
   getParentRoute: () => ClientsRoute,
 } as any)
+const InvoicesIndexRoute = InvoicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InvoicesRoute,
+} as any)
+const InvoicesInvoiceIdRoute = InvoicesInvoiceIdRouteImport.update({
+  id: '/$invoiceId',
+  path: '/$invoiceId',
+  getParentRoute: () => InvoicesRoute,
+} as any)
 const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -99,28 +111,31 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/clients': typeof ClientsRouteWithChildren
-  '/invoices': typeof InvoicesRoute
+  '/invoices': typeof InvoicesRouteWithChildren
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/quotes': typeof QuotesRouteWithChildren
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/invoices/$invoiceId': typeof InvoicesInvoiceIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients/': typeof ClientsIndexRoute
+  '/invoices/': typeof InvoicesIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/quotes/': typeof QuotesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
-  '/invoices': typeof InvoicesRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/invoices/$invoiceId': typeof InvoicesInvoiceIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients': typeof ClientsIndexRoute
+  '/invoices': typeof InvoicesIndexRoute
   '/projects': typeof ProjectsIndexRoute
   '/quotes': typeof QuotesIndexRoute
 }
@@ -129,15 +144,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/activity': typeof ActivityRoute
   '/clients': typeof ClientsRouteWithChildren
-  '/invoices': typeof InvoicesRoute
+  '/invoices': typeof InvoicesRouteWithChildren
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/quotes': typeof QuotesRouteWithChildren
   '/clients/$clientId': typeof ClientsClientIdRoute
+  '/invoices/$invoiceId': typeof InvoicesInvoiceIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients/': typeof ClientsIndexRoute
+  '/invoices/': typeof InvoicesIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/quotes/': typeof QuotesIndexRoute
 }
@@ -153,22 +170,25 @@ export interface FileRouteTypes {
     | '/projects'
     | '/quotes'
     | '/clients/$clientId'
+    | '/invoices/$invoiceId'
     | '/projects/$projectId'
     | '/quotes/$quoteId'
     | '/clients/'
+    | '/invoices/'
     | '/projects/'
     | '/quotes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/activity'
-    | '/invoices'
     | '/login'
     | '/profile'
     | '/clients/$clientId'
+    | '/invoices/$invoiceId'
     | '/projects/$projectId'
     | '/quotes/$quoteId'
     | '/clients'
+    | '/invoices'
     | '/projects'
     | '/quotes'
   id:
@@ -182,9 +202,11 @@ export interface FileRouteTypes {
     | '/projects'
     | '/quotes'
     | '/clients/$clientId'
+    | '/invoices/$invoiceId'
     | '/projects/$projectId'
     | '/quotes/$quoteId'
     | '/clients/'
+    | '/invoices/'
     | '/projects/'
     | '/quotes/'
   fileRoutesById: FileRoutesById
@@ -193,7 +215,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ActivityRoute: typeof ActivityRoute
   ClientsRoute: typeof ClientsRouteWithChildren
-  InvoicesRoute: typeof InvoicesRoute
+  InvoicesRoute: typeof InvoicesRouteWithChildren
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
@@ -272,6 +294,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsClientIdRouteImport
       parentRoute: typeof ClientsRoute
     }
+    '/invoices/': {
+      id: '/invoices/'
+      path: '/'
+      fullPath: '/invoices/'
+      preLoaderRoute: typeof InvoicesIndexRouteImport
+      parentRoute: typeof InvoicesRoute
+    }
+    '/invoices/$invoiceId': {
+      id: '/invoices/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/invoices/$invoiceId'
+      preLoaderRoute: typeof InvoicesInvoiceIdRouteImport
+      parentRoute: typeof InvoicesRoute
+    }
     '/projects/': {
       id: '/projects/'
       path: '/'
@@ -316,6 +352,20 @@ const ClientsRouteChildren: ClientsRouteChildren = {
 const ClientsRouteWithChildren =
   ClientsRoute._addFileChildren(ClientsRouteChildren)
 
+interface InvoicesRouteChildren {
+  InvoicesInvoiceIdRoute: typeof InvoicesInvoiceIdRoute
+  InvoicesIndexRoute: typeof InvoicesIndexRoute
+}
+
+const InvoicesRouteChildren: InvoicesRouteChildren = {
+  InvoicesInvoiceIdRoute: InvoicesInvoiceIdRoute,
+  InvoicesIndexRoute: InvoicesIndexRoute,
+}
+
+const InvoicesRouteWithChildren = InvoicesRoute._addFileChildren(
+  InvoicesRouteChildren,
+)
+
 interface ProjectsRouteChildren {
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
@@ -347,7 +397,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityRoute: ActivityRoute,
   ClientsRoute: ClientsRouteWithChildren,
-  InvoicesRoute: InvoicesRoute,
+  InvoicesRoute: InvoicesRouteWithChildren,
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   ProjectsRoute: ProjectsRouteWithChildren,

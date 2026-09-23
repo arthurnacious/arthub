@@ -1,14 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { authStore } from '../stores/auth-store'
 
-export const Route = createFileRoute('/invoices')({ component: InvoicesPage })
-
-function InvoicesPage() {
-  return (
-    <div>
-      <h1 className="glow-text text-lg font-bold text-[var(--accent)]">INVOICES</h1>
-      <p className="mt-2 text-sm text-[var(--text-dim)]">
-        // coming soon: invoice list wired to the backend
-      </p>
-    </div>
-  )
-}
+// Pathless layout: /invoices (table, invoices.index.tsx) and
+// /invoices/$invoiceId (detail, invoices.$invoiceId.tsx) are unrelated
+// pages that just share this URL prefix - same pattern as
+// clients.tsx/projects.tsx/quotes.tsx.
+export const Route = createFileRoute('/invoices')({
+  beforeLoad: () => {
+    if (typeof window === 'undefined') return
+    if (authStore.store.state.token === null) {
+      throw redirect({ to: '/login' })
+    }
+  },
+  component: () => <Outlet />,
+})

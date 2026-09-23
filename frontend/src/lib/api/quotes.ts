@@ -1,9 +1,10 @@
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from './http'
 import type { PaginatedResult, PaginationParams } from './pagination'
 import type { StatusTone } from '../../components/StatusBadge'
+import type { DiscountType, LineItem } from '../line-items'
 
+export type { DiscountType } from '../line-items'
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
-export type DiscountType = 'percent' | 'fixed' | null
 
 export const QUOTE_STATUS_TONE: Record<QuoteStatus, StatusTone> = {
   draft: 'neutral',
@@ -61,13 +62,9 @@ export interface QuoteDetail {
 
 // A line item as sent to the backend - no id/lineTotal (the server
 // computes those; an update replaces every line rather than diffing).
-export interface QuoteLineInput {
-  description: string
-  quantity: number
-  unitPrice: number
-  discountType: DiscountType
-  discountValue: number
-}
+// Same shape as the shared LineItem type used by the editor UI - kept as
+// an alias so call sites read naturally as "a quote's line input".
+export type QuoteLineInput = LineItem
 
 export interface QuoteInput {
   projectId: string

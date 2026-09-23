@@ -1,7 +1,7 @@
-import { lineTotal } from '../lib/quote-totals'
-import type { QuoteLineInput } from '../lib/api/quotes'
+import { lineTotal } from '../lib/line-items'
+import type { LineItem } from '../lib/line-items'
 
-const EMPTY_LINE: QuoteLineInput = {
+const EMPTY_LINE: LineItem = {
   description: '',
   quantity: 1,
   unitPrice: 0,
@@ -18,15 +18,16 @@ function formatCurrency(value: number): string {
 
 // A repeatable table of line items - add/remove rows, each with its own
 // optional discount, and a live-computed total per row (see
-// lib/quote-totals.ts, which mirrors the backend's math exactly).
-export function QuoteLineItemsEditor({
+// lib/line-items.ts, which mirrors the backend's math exactly). Shared by
+// QuoteForm and InvoiceForm - both need byte-identical editing behavior.
+export function LineItemsEditor({
   lines,
   onChange,
 }: {
-  lines: QuoteLineInput[]
-  onChange: (lines: QuoteLineInput[]) => void
+  lines: LineItem[]
+  onChange: (lines: LineItem[]) => void
 }) {
-  function updateLine(index: number, patch: Partial<QuoteLineInput>) {
+  function updateLine(index: number, patch: Partial<LineItem>) {
     onChange(lines.map((line, i) => (i === index ? { ...line, ...patch } : line)))
   }
 

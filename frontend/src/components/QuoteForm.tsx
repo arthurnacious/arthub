@@ -1,8 +1,8 @@
 import { useId } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchProjects } from '../lib/api/projects'
-import { QuoteLineItemsEditor } from './QuoteLineItemsEditor'
-import { quoteTotals } from '../lib/quote-totals'
+import { LineItemsEditor } from './LineItemsEditor'
+import { computeTotals } from '../lib/line-items'
 import type { QuoteInput, QuoteStatus } from '../lib/api/quotes'
 
 const STATUS_OPTIONS: QuoteStatus[] = ['draft', 'sent', 'accepted', 'rejected', 'expired']
@@ -44,7 +44,7 @@ export function QuoteForm({
     queryFn: () => fetchProjects({ page: 1, pageSize: 200, search: '' }),
   })
 
-  const totals = quoteTotals(values.lineItems, values.discountType, values.discountValue)
+  const totals = computeTotals(values.lineItems, values.discountType, values.discountValue)
 
   return (
     <form
@@ -116,7 +116,7 @@ export function QuoteForm({
       <div>
         <span className="text-xs text-[var(--text-dim)]">line items</span>
         <div className="mt-1">
-          <QuoteLineItemsEditor
+          <LineItemsEditor
             lines={values.lineItems}
             onChange={(lineItems) => onChange({ ...values, lineItems })}
           />
