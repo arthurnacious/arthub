@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use App\Modules\Auth\AuthController;
+use App\Modules\Auth\Dto\ChangePasswordDto;
 use App\Modules\Auth\Dto\ForgotPasswordDto;
 use App\Modules\Auth\Dto\LoginDto;
 use App\Modules\Auth\Dto\ResetPasswordDto;
+use App\Modules\Auth\Dto\UpdateProfileDto;
 use App\Modules\Auth\Services\AuthService;
+use Hyperdrive\Http\Request;
 use Hyperdrive\Security\JwtService;
 use Tests\Doubles\FakeMailer;
 
@@ -74,4 +77,72 @@ it('rejects an invalid reset token', function () {
 
     expect($response->getStatusCode())->toBe(422)
         ->and($body['error'])->toBe('Invalid or expired reset token');
+});
+
+it('returns the current user for /me', function () {
+    $userId = create_test_user(email: 'me@example.com', name: 'Me');
+    [$controller] = make_auth_controller();
+
+    $response = $controller->me(new Request(attributes: ['auth_user' => ['sub' => $userId]]));
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($body['name'])->toBe('Me')
+        ->and($body['email'])->toBe('me@example.com')
+        ->and($body)->not->toHaveKey('password_hash');
+});
+
+it('updates the current user\'s name and email', function () {
+    $userId = create_test_user(email: 'old@example.com', name: 'Old Name');
+    [$controller] = make_auth_controller();
+
+    $response = $controller->updateMe(
+        new UpdateProfileDto(['name' => 'New Name', 'email' => 'new@example.com']),
+        new Request(attributes: ['auth_user' => ['sub' => $userId]]),
+    );
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($body['name'])->toBe('New Name')
+        ->and($body['email'])->toBe('new@example.com');
+});
+
+it('rejects updating to an email already used by someone else', function () {
+    create_test_user(email: 'taken@example.com');
+    $userId = create_test_user(email: 'mine@example.com');
+    [$controller] = make_auth_controller();
+
+    $response = $controller->updateMe(
+        new UpdateProfileDto(['name' => 'X', 'email' => 'taken@example.com']),
+        new Request(attributes: ['auth_user' => ['sub' => $userId]]),
+    );
+
+    expect($response->getStatusCode())->toBe(422);
+});
+
+it('changes the current user\'s password given the correct current one', function () {
+    $userId = create_test_user(email: 'pw@example.com', password: 'old-password');
+    [$controller, $auth] = make_auth_controller();
+
+    $response = $controller->changePassword(
+        new ChangePasswordDto(['currentPassword' => 'old-password', 'newPassword' => 'new-password']),
+        new Request(attributes: ['auth_user' => ['sub' => $userId]]),
+    );
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($auth->attempt('pw@example.com', 'new-password'))->toBeString();
+});
+
+it('rejects changing the password with the wrong current password', function () {
+    $userId = create_test_user(email: 'pw@example.com', password: 'old-password');
+    [$controller] = make_auth_controller();
+
+    $response = $controller->changePassword(
+        new ChangePasswordDto(['currentPassword' => 'wrong', 'newPassword' => 'new-password']),
+        new Request(attributes: ['auth_user' => ['sub' => $userId]]),
+    );
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(422)
+        ->and($body['error'])->toBe('Current password is incorrect');
 });

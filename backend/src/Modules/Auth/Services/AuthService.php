@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Auth\Services;
 
 use App\Database\Connection;
+use App\Events\PasswordChanged;
 use App\Events\PasswordWasReset;
+use App\Events\ProfileUpdated;
 use App\Events\UserLoggedIn;
 use Hyperdrive\Events\EventDispatcher;
 use Hyperdrive\Security\JwtService;
@@ -62,6 +64,55 @@ class AuthService
         $user = $statement->fetch();
 
         return $user !== false ? $user : null;
+    }
+
+    /**
+     * Returns null if $email is already taken by a *different* user.
+     *
+     * @return array<string, mixed>|null the updated user, or null on a
+     *                                    duplicate email
+     */
+    public function updateProfile(string $userId, string $name, string $email): ?array
+    {
+        $existing = $this->connection->pdo()->prepare(
+            'SELECT 1 FROM users WHERE email = :email AND id != :id',
+        );
+        $existing->execute(['email' => $email, 'id' => $userId]);
+        if ($existing->fetchColumn() !== false) {
+            return null;
+        }
+
+        $statement = $this->connection->pdo()->prepare(
+            'UPDATE users SET name = :name, email = :email, updated_at = NOW() WHERE id = :id',
+        );
+        $statement->execute(['name' => $name, 'email' => $email, 'id' => $userId]);
+
+        $this->events->dispatch(new ProfileUpdated(userId: $userId, name: $name));
+
+        return $this->findById($userId);
+    }
+
+    /**
+     * Returns false if $userId doesn't exist or $currentPassword is wrong.
+     */
+    public function changePassword(string $userId, string $currentPassword, string $newPassword): bool
+    {
+        $user = $this->findById($userId);
+        if ($user === null || !password_verify($currentPassword, $user['password_hash'])) {
+            return false;
+        }
+
+        $statement = $this->connection->pdo()->prepare(
+            'UPDATE users SET password_hash = :hash, updated_at = NOW() WHERE id = :id',
+        );
+        $statement->execute([
+            'hash' => password_hash($newPassword, PASSWORD_BCRYPT),
+            'id' => $userId,
+        ]);
+
+        $this->events->dispatch(new PasswordChanged(userId: $userId));
+
+        return true;
     }
 
     /**
