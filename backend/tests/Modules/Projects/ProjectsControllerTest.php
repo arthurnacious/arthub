@@ -279,6 +279,22 @@ it('uploads images for a project', function () {
     expect($detailBody['images'])->toHaveCount(1);
 });
 
+it('stores the file under an extension derived from its validated MIME type, not the client-supplied filename', function () {
+    $id = create_test_project();
+    // Original filename claims .php; Content-Type claims image/png. Only
+    // the (checked) Content-Type should decide what extension lands on
+    // disk - otherwise a request could get an arbitrary extension stored
+    // just by lying about the filename.
+    $upload = make_test_upload('shell.php', 'image/png');
+
+    $response = make_projects_controller()->uploadImages($id, new Request(files: ['images' => $upload]));
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(201)
+        ->and($body['data'][0]['url'])->toEndWith('.png')
+        ->and($body['data'][0]['url'])->not->toContain('.php');
+});
+
 it('increments sort order across multiple uploads', function () {
     $id = create_test_project();
 

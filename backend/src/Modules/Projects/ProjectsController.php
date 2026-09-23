@@ -32,7 +32,16 @@ class ProjectsController
 {
     private const STATUSES = ['active', 'completed', 'archived'];
     private const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
-    private const ALLOWED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+    // Both the allow-list AND the extension a valid upload gets stored
+    // under - the stored extension must never come from the client (see
+    // uploadImages()), so this map is the only source of truth for both.
+    private const IMAGE_MIME_EXTENSIONS = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+        'image/gif' => 'gif',
+    ];
 
     public function __construct(
         private readonly Connection $connection,
@@ -260,14 +269,19 @@ class ProjectsController
             if (!$file->isValid()) {
                 return Response::json(['error' => 'One of the uploaded files was invalid'], 422);
             }
-            if (!in_array($file->getClientMimeType(), self::ALLOWED_IMAGE_MIME_TYPES, true)) {
+            $extension = self::IMAGE_MIME_EXTENSIONS[$file->getClientMimeType()] ?? null;
+            if ($extension === null) {
                 return Response::json(['error' => 'Images must be JPEG, PNG, WEBP or GIF'], 422);
             }
             if ($file->getSize() > self::MAX_IMAGE_BYTES) {
                 return Response::json(['error' => 'Each image must be 5MB or smaller'], 422);
             }
 
-            $filename = bin2hex(random_bytes(16)) . '.' . strtolower($file->getClientOriginalExtension());
+            // Extension comes from the validated MIME type above, never
+            // from the client-supplied original filename - otherwise a
+            // request could claim Content-Type: image/png while naming
+            // the file "shell.php" and get that extension written to disk.
+            $filename = bin2hex(random_bytes(16)) . '.' . $extension;
             $file->move(getcwd() . "/storage/app/projects/{$id}", $filename);
             $path = "projects/{$id}/{$filename}";
 
