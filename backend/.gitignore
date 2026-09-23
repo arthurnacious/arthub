@@ -12,3 +12,6 @@
 /tmp/
 /logs/
 /storage/
+
+# Machine-specific symlink created by `bin/console storage:link`
+/public/storage

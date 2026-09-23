@@ -118,3 +118,33 @@ function create_test_client(
 
     return $statement->fetchColumn();
 }
+
+/**
+ * Inserts a project row (creating a client for it if none is given) and
+ * returns its id (a UUID string).
+ */
+function create_test_project(
+    ?string $clientId = null,
+    string $name = 'Test Project',
+    string $category = 'general',
+    ?string $url = null,
+    string $status = 'active',
+): string {
+    $clientId ??= create_test_client(email: 'project-client-' . bin2hex(random_bytes(4)) . '@example.com');
+
+    $statement = test_connection()->pdo()->prepare(<<<SQL
+        INSERT INTO projects (client_id, name, category, url, status)
+        VALUES (:client_id, :name, :category, :url, :status)
+        RETURNING id
+    SQL);
+
+    $statement->execute([
+        'client_id' => $clientId,
+        'name' => $name,
+        'category' => $category,
+        'url' => $url,
+        'status' => $status,
+    ]);
+
+    return $statement->fetchColumn();
+}

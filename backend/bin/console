@@ -9,6 +9,7 @@ use App\Console\Commands\MakeMigrationCommand;
 use App\Console\Commands\MigrateCommand;
 use App\Console\Commands\MigrateRollbackCommand;
 use App\Console\Commands\SeedCommand;
+use App\Console\Commands\StorageLinkCommand;
 use App\Database\Connection;
 use App\Database\Migrator;
 use Symfony\Component\Console\Application;
@@ -27,6 +28,7 @@ $application->addCommands([
     new MigrateRollbackCommand($migrator),
     new MakeMigrationCommand($migrationsPath),
     new SeedCommand($connection),
+    new StorageLinkCommand(dirname(__DIR__)),
 ]);
 
 exit($application->run());
