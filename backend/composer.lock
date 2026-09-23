@@ -74,12 +74,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/arthurnacious/hyperdrive.git",
-                "reference": "75b39295476d19027e8ba19e60ab8d8b6697fd26"
+                "reference": "c3ddfc04262f2f4ccc5d4375e5de1f3793297ef4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/arthurnacious/hyperdrive/zipball/75b39295476d19027e8ba19e60ab8d8b6697fd26",
-                "reference": "75b39295476d19027e8ba19e60ab8d8b6697fd26",
+                "url": "https://api.github.com/repos/arthurnacious/hyperdrive/zipball/c3ddfc04262f2f4ccc5d4375e5de1f3793297ef4",
+                "reference": "c3ddfc04262f2f4ccc5d4375e5de1f3793297ef4",
                 "shasum": ""
             },
             "require": {
@@ -108,7 +108,7 @@
                 "issues": "https://github.com/arthurnacious/hyperdrive/issues",
                 "source": "https://github.com/arthurnacious/hyperdrive/tree/master"
             },
-            "time": "2026-09-23T11:22:46+00:00"
+            "time": "2026-09-23T11:43:32+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
