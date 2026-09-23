@@ -9,6 +9,8 @@ import { ErrorState } from '../components/ErrorState'
 import { InvoiceForm } from '../components/InvoiceForm'
 import { createInvoice, deleteInvoice, fetchInvoices } from '../lib/api/invoices'
 import type { Invoice, InvoiceInput, InvoiceStatus } from '../lib/api/invoices'
+import { fetchQuote } from '../lib/api/quotes'
+import type { QuoteDetail } from '../lib/api/quotes'
 import { useDebouncedValue } from '../hooks/use-debounced-value'
 import { useConfirm } from '../hooks/use-confirm'
 
@@ -32,6 +34,30 @@ interface InvoicesSearch {
   page: number
   q: string
   status: string
+  // Set by the quote detail page's "convert to invoice" link - a one-shot
+  // deep link, not persistent state (see the effect below, which clears
+  // it from the URL once it's been used to pre-fill the new-invoice form).
+  fromQuote: string
+}
+
+function toInvoiceInput(quote: QuoteDetail): InvoiceInput {
+  return {
+    projectId: quote.projectId,
+    quoteId: quote.id,
+    status: 'draft',
+    issueDate: null,
+    dueDate: null,
+    discountType: quote.discountType,
+    discountValue: quote.discountValue,
+    notes: quote.notes,
+    lineItems: quote.lines.map((line) => ({
+      description: line.description,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+      discountType: line.discountType,
+      discountValue: line.discountValue,
+    })),
+  }
 }
 
 export const Route = createFileRoute('/invoices/')({
@@ -39,12 +65,13 @@ export const Route = createFileRoute('/invoices/')({
     page: Number(search.page) > 0 ? Math.floor(Number(search.page)) : 1,
     q: typeof search.q === 'string' ? search.q : '',
     status: typeof search.status === 'string' ? search.status : '',
+    fromQuote: typeof search.fromQuote === 'string' ? search.fromQuote : '',
   }),
   component: InvoicesPage,
 })
 
 function InvoicesPage() {
-  const { page, q, status } = Route.useSearch()
+  const { page, q, status, fromQuote } = Route.useSearch()
   const navigate = Route.useNavigate()
   const queryClient = useQueryClient()
   const { confirm, dialog } = useConfirm()
@@ -87,6 +114,22 @@ function InvoicesPage() {
 
   const [newInvoiceOpen, setNewInvoiceOpen] = useState(false)
   const [newInvoiceForm, setNewInvoiceForm] = useState<InvoiceInput>(EMPTY_INVOICE)
+
+  const { data: sourceQuote } = useQuery({
+    queryKey: ['quote', fromQuote],
+    queryFn: () => fetchQuote(fromQuote),
+    enabled: fromQuote !== '',
+  })
+
+  useEffect(() => {
+    if (!sourceQuote) return
+    setNewInvoiceForm(toInvoiceInput(sourceQuote))
+    setNewInvoiceOpen(true)
+    // One-shot: drop fromQuote from the URL now that it's been used, so
+    // reloading/revisiting this page doesn't keep reopening the modal.
+    navigate({ search: (prev) => ({ ...prev, fromQuote: '' }), replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sourceQuote])
 
   const createMutation = useMutation({
     mutationFn: (values: InvoiceInput) => createInvoice(values),

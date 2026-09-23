@@ -96,7 +96,7 @@ function InvoiceDetailPage() {
     mutationFn: () => deleteInvoice(invoiceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] })
-      navigate({ to: '/invoices', search: { page: 1, q: '', status: '' } })
+      navigate({ to: '/invoices', search: { page: 1, q: '', status: '', fromQuote: '' } })
     },
   })
 
@@ -148,7 +148,7 @@ function InvoiceDetailPage() {
           <h1 className="glow-text text-lg font-bold text-[var(--accent)]">INVOICE</h1>
           <Link
             to="/invoices"
-            search={{ page: 1, q: '', status: '' }}
+            search={{ page: 1, q: '', status: '', fromQuote: '' }}
             className="text-xs text-[var(--text-dim)] hover:text-[var(--accent)]"
           >
             &larr; back to invoices
@@ -171,7 +171,7 @@ function InvoiceDetailPage() {
         <h1 className="glow-text text-lg font-bold text-[var(--accent)]">INVOICE NOT FOUND</h1>
         <Link
           to="/invoices"
-          search={{ page: 1, q: '', status: '' }}
+          search={{ page: 1, q: '', status: '', fromQuote: '' }}
           className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
         >
           &larr; back to invoices
@@ -186,7 +186,7 @@ function InvoiceDetailPage() {
         <h1 className="glow-text text-lg font-bold text-[var(--accent)]">{invoice.invoiceNumber}</h1>
         <Link
           to="/invoices"
-          search={{ page: 1, q: '', status: '' }}
+          search={{ page: 1, q: '', status: '', fromQuote: '' }}
           className="text-xs text-[var(--text-dim)] hover:text-[var(--accent)]"
         >
           &larr; back to invoices
