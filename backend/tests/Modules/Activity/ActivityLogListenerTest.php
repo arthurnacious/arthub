@@ -9,6 +9,9 @@ use App\Events\PasswordWasReset;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
 use App\Events\ProjectUpdated;
+use App\Events\QuoteCreated;
+use App\Events\QuoteDeleted;
+use App\Events\QuoteUpdated;
 use App\Events\UserLoggedIn;
 use App\Modules\Activity\Listeners\ActivityLogListener;
 use App\Support\ActivityLogger;
@@ -94,6 +97,39 @@ it('translates ProjectDeleted into a project.deleted row', function () {
     expect($row['description'])->toBe('Deleted project Acme Site')
         ->and($row['subject_type'])->toBe('project')
         ->and($row['subject_id'])->toBe($projectId);
+});
+
+it('translates QuoteCreated into a quote.created row', function () {
+    $quoteId = create_test_quote();
+
+    make_activity_log_listener()->onQuoteCreated(new QuoteCreated($quoteId, 'Q-0001', null));
+
+    $row = latest_activity_log_row('quote.created');
+    expect($row['description'])->toBe('Created quote Q-0001')
+        ->and($row['subject_type'])->toBe('quote')
+        ->and($row['subject_id'])->toBe($quoteId);
+});
+
+it('translates QuoteUpdated into a quote.updated row', function () {
+    $quoteId = create_test_quote();
+
+    make_activity_log_listener()->onQuoteUpdated(new QuoteUpdated($quoteId, 'Q-0001', null));
+
+    $row = latest_activity_log_row('quote.updated');
+    expect($row['description'])->toBe('Updated quote Q-0001')
+        ->and($row['subject_type'])->toBe('quote')
+        ->and($row['subject_id'])->toBe($quoteId);
+});
+
+it('translates QuoteDeleted into a quote.deleted row', function () {
+    $quoteId = create_test_quote();
+
+    make_activity_log_listener()->onQuoteDeleted(new QuoteDeleted($quoteId, 'Q-0001', null));
+
+    $row = latest_activity_log_row('quote.deleted');
+    expect($row['description'])->toBe('Deleted quote Q-0001')
+        ->and($row['subject_type'])->toBe('quote')
+        ->and($row['subject_id'])->toBe($quoteId);
 });
 
 it('translates UserLoggedIn into an auth.login row with no subject', function () {

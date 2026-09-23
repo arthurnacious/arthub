@@ -11,6 +11,9 @@ use App\Events\PasswordWasReset;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
 use App\Events\ProjectUpdated;
+use App\Events\QuoteCreated;
+use App\Events\QuoteDeleted;
+use App\Events\QuoteUpdated;
 use App\Events\UserLoggedIn;
 use App\Support\ActivityLogger;
 use Hyperdrive\Attributes\Events\Listener;
@@ -94,6 +97,42 @@ class ActivityLogListener
             userId: $event->userId,
             subjectType: 'project',
             subjectId: $event->projectId,
+        );
+    }
+
+    #[Listener(QuoteCreated::class)]
+    public function onQuoteCreated(QuoteCreated $event): void
+    {
+        $this->logger->log(
+            action: 'quote.created',
+            description: "Created quote {$event->quoteNumber}",
+            userId: $event->userId,
+            subjectType: 'quote',
+            subjectId: $event->quoteId,
+        );
+    }
+
+    #[Listener(QuoteUpdated::class)]
+    public function onQuoteUpdated(QuoteUpdated $event): void
+    {
+        $this->logger->log(
+            action: 'quote.updated',
+            description: "Updated quote {$event->quoteNumber}",
+            userId: $event->userId,
+            subjectType: 'quote',
+            subjectId: $event->quoteId,
+        );
+    }
+
+    #[Listener(QuoteDeleted::class)]
+    public function onQuoteDeleted(QuoteDeleted $event): void
+    {
+        $this->logger->log(
+            action: 'quote.deleted',
+            description: "Deleted quote {$event->quoteNumber}",
+            userId: $event->userId,
+            subjectType: 'quote',
+            subjectId: $event->quoteId,
         );
     }
 
