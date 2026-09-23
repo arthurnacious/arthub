@@ -10,6 +10,8 @@ import { Skeleton } from '../components/Skeleton'
 import { TableRowsSkeleton } from '../components/TableRowsSkeleton'
 import { INVOICE_STATUS_TONE, deleteInvoice, fetchInvoice, updateInvoice } from '../lib/api/invoices'
 import type { InvoiceDetail, InvoiceInput } from '../lib/api/invoices'
+import { fetchProfile } from '../lib/api/auth'
+import { downloadInvoicePdf } from '../lib/invoice-pdf'
 import { useConfirm } from '../hooks/use-confirm'
 
 const LINE_ITEM_SKELETON_COLUMNS = [
@@ -78,6 +80,7 @@ function InvoiceDetailPage() {
 
   const [editing, setEditing] = useState(editFromUrl)
   const [form, setForm] = useState<InvoiceInput | null>(null)
+  const [downloadingPdf, setDownloadingPdf] = useState(false)
 
   useEffect(() => {
     if (invoice) setForm(toFormValues(invoice))
@@ -110,6 +113,20 @@ function InvoiceDetailPage() {
     })
     if (!confirmed) return
     deleteMutation.mutate()
+  }
+
+  async function handleDownloadPdf() {
+    if (!invoice) return
+    setDownloadingPdf(true)
+    try {
+      const profile = await queryClient.ensureQueryData({
+        queryKey: ['profile'],
+        queryFn: fetchProfile,
+      })
+      downloadInvoicePdf(invoice, { name: profile.name, email: profile.email })
+    } finally {
+      setDownloadingPdf(false)
+    }
   }
 
   if (isPending) {
@@ -308,6 +325,14 @@ function InvoiceDetailPage() {
               <div className="mt-2 flex gap-2">
                 <button type="button" onClick={() => setEditing(true)} className={BUTTON_CLASSES}>
                   edit
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  className={`${BUTTON_CLASSES} disabled:opacity-50`}
+                >
+                  {downloadingPdf ? 'generating…' : 'download pdf'}
                 </button>
                 <button
                   type="button"
