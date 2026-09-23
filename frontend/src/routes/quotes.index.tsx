@@ -5,6 +5,7 @@ import { Panel } from '../components/Panel'
 import { QuotesTable } from '../components/QuotesTable'
 import { Pagination } from '../components/Pagination'
 import { Modal } from '../components/Modal'
+import { ErrorState } from '../components/ErrorState'
 import { QuoteForm } from '../components/QuoteForm'
 import { createQuote, deleteQuote, fetchQuotes } from '../lib/api/quotes'
 import type { Quote, QuoteInput, QuoteStatus } from '../lib/api/quotes'
@@ -59,7 +60,7 @@ function QuotesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['quotes', { page, pageSize: PAGE_SIZE, search: q, status }],
     queryFn: () => fetchQuotes({ page, pageSize: PAGE_SIZE, search: q, status }),
     placeholderData: (previousData) => previousData,
@@ -135,12 +136,17 @@ function QuotesPage() {
               ))}
             </select>
           </div>
-          {isPending ? (
-            <p className="text-sm text-[var(--text-dim)]">loading...</p>
+          {isError ? (
+            <ErrorState
+              title="COULDN'T LOAD QUOTES"
+              message="Something went wrong fetching the quote list."
+              onRetry={() => refetch()}
+            />
           ) : (
             <>
               <QuotesTable
                 quotes={data?.data ?? []}
+                isLoading={isPending}
                 onView={(quote) =>
                   navigate({ to: '/quotes/$quoteId', params: { quoteId: quote.id } })
                 }

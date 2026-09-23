@@ -5,6 +5,7 @@ import { Panel } from '../components/Panel'
 import { InvoicesTable } from '../components/InvoicesTable'
 import { Pagination } from '../components/Pagination'
 import { Modal } from '../components/Modal'
+import { ErrorState } from '../components/ErrorState'
 import { InvoiceForm } from '../components/InvoiceForm'
 import { createInvoice, deleteInvoice, fetchInvoices } from '../lib/api/invoices'
 import type { Invoice, InvoiceInput, InvoiceStatus } from '../lib/api/invoices'
@@ -60,7 +61,7 @@ function InvoicesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['invoices', { page, pageSize: PAGE_SIZE, search: q, status }],
     queryFn: () => fetchInvoices({ page, pageSize: PAGE_SIZE, search: q, status }),
     placeholderData: (previousData) => previousData,
@@ -136,12 +137,17 @@ function InvoicesPage() {
               ))}
             </select>
           </div>
-          {isPending ? (
-            <p className="text-sm text-[var(--text-dim)]">loading...</p>
+          {isError ? (
+            <ErrorState
+              title="COULDN'T LOAD INVOICES"
+              message="Something went wrong fetching the invoice list."
+              onRetry={() => refetch()}
+            />
           ) : (
             <>
               <InvoicesTable
                 invoices={data?.data ?? []}
+                isLoading={isPending}
                 onView={(invoice) =>
                   navigate({ to: '/invoices/$invoiceId', params: { invoiceId: invoice.id } })
                 }

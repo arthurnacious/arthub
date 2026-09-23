@@ -28,6 +28,15 @@ describe('InvoicesTable', () => {
     expect(screen.getByText('-- no invoices match --')).toBeInTheDocument()
   })
 
+  it('shows skeleton rows instead of the empty placeholder while loading', () => {
+    const { container } = render(
+      <InvoicesTable invoices={[]} isLoading onView={() => {}} onUpdate={() => {}} onDelete={() => {}} />,
+    )
+
+    expect(screen.queryByText('-- no invoices match --')).not.toBeInTheDocument()
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(5)
+  })
+
   it('renders invoice number, project, client, status and formatted total', () => {
     render(<InvoicesTable invoices={INVOICES} onView={() => {}} onUpdate={() => {}} onDelete={() => {}} />)
 

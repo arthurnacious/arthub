@@ -33,8 +33,10 @@ const LOGIN_EVENT: ActivityEntry = {
   created_at: new Date().toISOString(),
 }
 
-function renderWithProviders(entries: ActivityEntry[]) {
-  const rootRoute = createRootRoute({ component: () => <AuditLogTable entries={entries} /> })
+function renderWithProviders(entries: ActivityEntry[], isLoading = false) {
+  const rootRoute = createRootRoute({
+    component: () => <AuditLogTable entries={entries} isLoading={isLoading} />,
+  })
   const clientRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/clients/$clientId',
@@ -62,6 +64,13 @@ describe('AuditLogTable', () => {
     renderWithProviders([])
 
     expect(await screen.findByText('-- no activity yet --')).toBeInTheDocument()
+  })
+
+  it('shows skeleton rows instead of the empty placeholder while loading', async () => {
+    renderWithProviders([], true)
+
+    expect(await screen.findAllByRole('row')).toHaveLength(6) // 1 header + 5 skeleton rows
+    expect(screen.queryByText('-- no activity yet --')).not.toBeInTheDocument()
   })
 
   it('navigates when a row with a known subject is clicked', async () => {

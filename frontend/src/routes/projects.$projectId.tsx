@@ -5,6 +5,9 @@ import { Panel } from '../components/Panel'
 import { StatusBadge } from '../components/StatusBadge'
 import { ImageSlider } from '../components/ImageSlider'
 import { ProjectForm } from '../components/ProjectForm'
+import { DetailFieldsSkeleton } from '../components/DetailFieldsSkeleton'
+import { ErrorState } from '../components/ErrorState'
+import { Skeleton } from '../components/Skeleton'
 import type { ProjectFormValues } from '../components/ProjectForm'
 import {
   PROJECT_STATUS_TONE,
@@ -50,7 +53,7 @@ function ProjectDetailPage() {
   const { confirm, dialog } = useConfirm()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { data: project, isPending, isError } = useQuery({
+  const { data: project, isPending, isError, refetch } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => fetchProject(projectId),
   })
@@ -125,23 +128,39 @@ function ProjectDetailPage() {
   }
 
   if (isPending) {
-    return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+    return (
+      <div>
+        <Skeleton className="h-6 w-48" />
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <Skeleton className="aspect-video w-full" />
+          <Panel title="project">
+            <DetailFieldsSkeleton />
+          </Panel>
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
     return (
       <div>
-        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD PROJECT</h1>
-        <p className="mt-2 text-sm text-red-400">
-          Something went wrong fetching this project. Try refreshing the page.
-        </p>
-        <Link
-          to="/projects"
-          search={{ q: '', category: '' }}
-          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
-        >
-          &larr; back to projects
-        </Link>
+        <div className="flex items-center justify-between">
+          <h1 className="glow-text text-lg font-bold text-[var(--accent)]">PROJECT</h1>
+          <Link
+            to="/projects"
+            search={{ q: '', category: '' }}
+            className="text-xs text-[var(--text-dim)] hover:text-[var(--accent)]"
+          >
+            &larr; back to projects
+          </Link>
+        </div>
+        <div className="mt-6">
+          <ErrorState
+            title="COULDN'T LOAD PROJECT"
+            message="Something went wrong fetching this project."
+            onRetry={() => refetch()}
+          />
+        </div>
       </div>
     )
   }

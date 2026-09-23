@@ -61,7 +61,19 @@ describe('AuditLogPanel', () => {
 
     renderPanel()
 
-    expect(await screen.findByText(/couldn't load the audit log/i)).toBeInTheDocument()
+    expect(await screen.findByText("COULDN'T LOAD ACTIVITY")).toBeInTheDocument()
+  })
+
+  it('retries the query when the retry button is clicked', async () => {
+    const user = userEvent.setup()
+    vi.spyOn(activityApi, 'fetchActivityLog')
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValue({ data: [], page: 1, pageSize: 5, total: 0 })
+
+    renderPanel()
+    await user.click(await screen.findByRole('button', { name: 'retry' }))
+
+    expect(await screen.findByText('-- no activity yet --')).toBeInTheDocument()
   })
 
   it('calls onPageChange when a pagination control is clicked', async () => {

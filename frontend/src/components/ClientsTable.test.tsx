@@ -34,6 +34,13 @@ describe('ClientsTable', () => {
     expect(screen.getByText('-- no clients match --')).toBeInTheDocument()
   })
 
+  it('shows skeleton rows instead of the empty placeholder while loading', () => {
+    const { container } = render(<ClientsTable clients={[]} isLoading {...NOOP_ACTIONS} />)
+
+    expect(screen.queryByText('-- no clients match --')).not.toBeInTheDocument()
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(5)
+  })
+
   it('wires each row\'s actions menu to the right client', async () => {
     const user = userEvent.setup()
     const onView = vi.fn()

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AuditLogTable } from '../AuditLogTable'
 import { Pagination } from '../Pagination'
+import { ErrorState } from '../ErrorState'
 import { fetchActivityLog } from '../../lib/api/activity'
 import { useDebouncedValue } from '../../hooks/use-debounced-value'
 
@@ -31,7 +32,7 @@ export function AuditLogPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['activity-log', { page, pageSize: PAGE_SIZE, search: q }],
     queryFn: () => fetchActivityLog({ page, pageSize: PAGE_SIZE, search: q }),
     placeholderData: (previousData) => previousData,
@@ -46,13 +47,15 @@ export function AuditLogPanel({
         placeholder="search action or description..."
         className="mb-4 w-full rounded border border-[var(--border)] bg-transparent px-3 py-1.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-dim)] focus:border-[var(--accent)]"
       />
-      {isPending ? (
-        <p className="text-sm text-[var(--text-dim)]">loading...</p>
-      ) : isError ? (
-        <p className="text-sm text-red-400">-- couldn't load the audit log --</p>
+      {isError ? (
+        <ErrorState
+          title="COULDN'T LOAD ACTIVITY"
+          message="Something went wrong fetching the audit log."
+          onRetry={() => refetch()}
+        />
       ) : (
         <>
-          <AuditLogTable entries={data?.data ?? []} />
+          <AuditLogTable entries={data?.data ?? []} isLoading={isPending} />
           <div className="mt-4">
             <Pagination
               page={page}

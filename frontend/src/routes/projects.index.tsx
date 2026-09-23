@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ProjectCard } from '../components/ProjectCard'
+import { ProjectCardSkeleton } from '../components/ProjectCardSkeleton'
 import { Modal } from '../components/Modal'
+import { ErrorState } from '../components/ErrorState'
 import { ProjectForm } from '../components/ProjectForm'
 import type { ProjectFormValues } from '../components/ProjectForm'
 import { createProject, fetchProjectCategories, fetchProjects } from '../lib/api/projects'
@@ -56,6 +58,7 @@ function ProjectsPage() {
     data,
     isPending,
     isError,
+    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -132,9 +135,17 @@ function ProjectsPage() {
 
       <div className="mt-6">
         {isPending ? (
-          <p className="text-sm text-[var(--text-dim)]">loading...</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <ProjectCardSkeleton key={i} />
+            ))}
+          </div>
         ) : isError ? (
-          <p className="text-sm text-red-400">-- couldn't load projects --</p>
+          <ErrorState
+            title="COULDN'T LOAD PROJECTS"
+            message="Something went wrong fetching the project list."
+            onRetry={() => refetch()}
+          />
         ) : projects.length === 0 ? (
           <p className="text-sm text-[var(--text-dim)]">-- no projects yet --</p>
         ) : (

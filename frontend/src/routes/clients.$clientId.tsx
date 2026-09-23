@@ -4,6 +4,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Panel } from '../components/Panel'
 import { StatusBadge } from '../components/StatusBadge'
 import { ClientForm } from '../components/ClientForm'
+import { DetailFieldsSkeleton } from '../components/DetailFieldsSkeleton'
+import { ErrorState } from '../components/ErrorState'
+import { Skeleton } from '../components/Skeleton'
 import { fetchClient, updateClient } from '../lib/api/clients'
 import { CLIENT_STATUS_TONE } from '../lib/mock-clients'
 import type { Client } from '../lib/mock-clients'
@@ -27,7 +30,7 @@ function ClientDetailPage() {
   const { edit: editFromUrl } = Route.useSearch()
   const queryClient = useQueryClient()
 
-  const { data: client, isPending, isError } = useQuery({
+  const { data: client, isPending, isError, refetch } = useQuery({
     queryKey: ['client', clientId],
     queryFn: () => fetchClient(clientId),
   })
@@ -49,23 +52,38 @@ function ClientDetailPage() {
   })
 
   if (isPending) {
-    return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+    return (
+      <div>
+        <Skeleton className="h-6 w-48" />
+        <div className="mt-6 max-w-md">
+          <Panel title="client">
+            <DetailFieldsSkeleton />
+          </Panel>
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
     return (
       <div>
-        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD CLIENT</h1>
-        <p className="mt-2 text-sm text-red-400">
-          Something went wrong fetching this client. Try refreshing the page.
-        </p>
-        <Link
-          to="/clients"
-          search={{ page: 1, q: '' }}
-          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
-        >
-          &larr; back to clients
-        </Link>
+        <div className="flex items-center justify-between">
+          <h1 className="glow-text text-lg font-bold text-[var(--accent)]">CLIENT</h1>
+          <Link
+            to="/clients"
+            search={{ page: 1, q: '' }}
+            className="text-xs text-[var(--text-dim)] hover:text-[var(--accent)]"
+          >
+            &larr; back to clients
+          </Link>
+        </div>
+        <div className="mt-6">
+          <ErrorState
+            title="COULDN'T LOAD CLIENT"
+            message="Something went wrong fetching this client."
+            onRetry={() => refetch()}
+          />
+        </div>
       </div>
     )
   }

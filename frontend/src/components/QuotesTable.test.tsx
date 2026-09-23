@@ -26,6 +26,15 @@ describe('QuotesTable', () => {
     expect(screen.getByText('-- no quotes match --')).toBeInTheDocument()
   })
 
+  it('shows skeleton rows instead of the empty placeholder while loading', () => {
+    const { container } = render(
+      <QuotesTable quotes={[]} isLoading onView={() => {}} onUpdate={() => {}} onDelete={() => {}} />,
+    )
+
+    expect(screen.queryByText('-- no quotes match --')).not.toBeInTheDocument()
+    expect(container.querySelectorAll('tbody tr')).toHaveLength(5)
+  })
+
   it('renders quote number, project, client, status and formatted total', () => {
     render(<QuotesTable quotes={QUOTES} onView={() => {}} onUpdate={() => {}} onDelete={() => {}} />)
 

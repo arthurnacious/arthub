@@ -4,9 +4,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Panel } from '../components/Panel'
 import { StatusBadge } from '../components/StatusBadge'
 import { InvoiceForm } from '../components/InvoiceForm'
+import { DetailFieldsSkeleton } from '../components/DetailFieldsSkeleton'
+import { ErrorState } from '../components/ErrorState'
+import { Skeleton } from '../components/Skeleton'
+import { TableRowsSkeleton } from '../components/TableRowsSkeleton'
 import { INVOICE_STATUS_TONE, deleteInvoice, fetchInvoice, updateInvoice } from '../lib/api/invoices'
 import type { InvoiceDetail, InvoiceInput } from '../lib/api/invoices'
 import { useConfirm } from '../hooks/use-confirm'
+
+const LINE_ITEM_SKELETON_COLUMNS = [
+  { className: 'py-2 pr-2', width: 'w-40' },
+  { className: 'py-2 pr-2 text-right', width: 'w-6', align: 'right' as const },
+  { className: 'py-2 pr-2 text-right', width: 'w-14', align: 'right' as const },
+  { className: 'py-2 pr-2 text-right', width: 'w-10', align: 'right' as const },
+  { className: 'py-2 text-right', width: 'w-14', align: 'right' as const },
+]
 
 interface InvoiceDetailSearch {
   edit: boolean
@@ -59,7 +71,7 @@ function InvoiceDetailPage() {
   const queryClient = useQueryClient()
   const { confirm, dialog } = useConfirm()
 
-  const { data: invoice, isPending, isError } = useQuery({
+  const { data: invoice, isPending, isError, refetch } = useQuery({
     queryKey: ['invoice', invoiceId],
     queryFn: () => fetchInvoice(invoiceId),
   })
@@ -101,23 +113,54 @@ function InvoiceDetailPage() {
   }
 
   if (isPending) {
-    return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+    return (
+      <div>
+        <Skeleton className="h-6 w-32" />
+        <div className="mt-6 max-w-2xl">
+          <Panel title="invoice">
+            <div className="flex flex-col gap-4">
+              <DetailFieldsSkeleton rows={3} />
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-[var(--border)] uppercase tracking-wider text-[var(--text-dim)]">
+                    <th className="py-2 pr-2 font-normal">Description</th>
+                    <th className="py-2 pr-2 text-right font-normal">Qty</th>
+                    <th className="py-2 pr-2 text-right font-normal">Unit price</th>
+                    <th className="py-2 pr-2 text-right font-normal">Discount</th>
+                    <th className="py-2 text-right font-normal">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRowsSkeleton rows={3} columns={LINE_ITEM_SKELETON_COLUMNS} />
+                </tbody>
+              </table>
+            </div>
+          </Panel>
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
     return (
       <div>
-        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD INVOICE</h1>
-        <p className="mt-2 text-sm text-red-400">
-          Something went wrong fetching this invoice. Try refreshing the page.
-        </p>
-        <Link
-          to="/invoices"
-          search={{ page: 1, q: '', status: '' }}
-          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
-        >
-          &larr; back to invoices
-        </Link>
+        <div className="flex items-center justify-between">
+          <h1 className="glow-text text-lg font-bold text-[var(--accent)]">INVOICE</h1>
+          <Link
+            to="/invoices"
+            search={{ page: 1, q: '', status: '' }}
+            className="text-xs text-[var(--text-dim)] hover:text-[var(--accent)]"
+          >
+            &larr; back to invoices
+          </Link>
+        </div>
+        <div className="mt-6">
+          <ErrorState
+            title="COULDN'T LOAD INVOICE"
+            message="Something went wrong fetching this invoice."
+            onRetry={() => refetch()}
+          />
+        </div>
       </div>
     )
   }

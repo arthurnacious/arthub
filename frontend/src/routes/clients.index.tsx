@@ -5,6 +5,7 @@ import { Panel } from '../components/Panel'
 import { ClientsTable } from '../components/ClientsTable'
 import { Pagination } from '../components/Pagination'
 import { Modal } from '../components/Modal'
+import { ErrorState } from '../components/ErrorState'
 import { ClientForm } from '../components/ClientForm'
 import type { ClientFormValues } from '../components/ClientForm'
 import { fetchClients, deleteClient, createClient } from '../lib/api/clients'
@@ -61,7 +62,7 @@ function ClientsPage() {
   // page/q live in the URL and drive the query key, so each page or search
   // change is its own server request - not an in-memory filter over
   // everything already fetched.
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError, refetch } = useQuery({
     queryKey: ['clients', { page, pageSize: PAGE_SIZE, search: q }],
     queryFn: () => fetchClients({ page, pageSize: PAGE_SIZE, search: q }),
     placeholderData: (previousData) => previousData,
@@ -121,12 +122,17 @@ function ClientsPage() {
             placeholder="search company, contact or email..."
             className="mb-4 w-full rounded border border-[var(--border)] bg-transparent px-3 py-1.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-dim)] focus:border-[var(--accent)]"
           />
-          {isPending ? (
-            <p className="text-sm text-[var(--text-dim)]">loading...</p>
+          {isError ? (
+            <ErrorState
+              title="COULDN'T LOAD CLIENTS"
+              message="Something went wrong fetching the client list."
+              onRetry={() => refetch()}
+            />
           ) : (
             <>
               <ClientsTable
                 clients={data?.data ?? []}
+                isLoading={isPending}
                 onView={(client) =>
                   navigate({ to: '/clients/$clientId', params: { clientId: client.id } })
                 }
