@@ -1,14 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { authStore } from '../stores/auth-store'
 
-export const Route = createFileRoute('/projects')({ component: ProjectsPage })
-
-function ProjectsPage() {
-  return (
-    <div>
-      <h1 className="glow-text text-lg font-bold text-[var(--accent)]">PROJECTS</h1>
-      <p className="mt-2 text-sm text-[var(--text-dim)]">
-        // coming soon: project list wired to the backend
-      </p>
-    </div>
-  )
-}
+// Pathless layout: /projects (grid, projects.index.tsx) and
+// /projects/$projectId (detail, projects.$projectId.tsx) are unrelated
+// pages that just share this URL prefix - this route exists only so
+// file-based routing can nest them, plus the auth guard below (it covers
+// both children, since it's their shared parent). Same pattern as
+// clients.tsx.
+export const Route = createFileRoute('/projects')({
+  beforeLoad: () => {
+    if (typeof window === 'undefined') return
+    if (authStore.store.state.token === null) {
+      throw redirect({ to: '/login' })
+    }
+  },
+  component: () => <Outlet />,
+})

@@ -25,11 +25,15 @@ function errorMessage(body: ErrorBody | null, status: number): string {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = authStore.store.state.token
+  // A FormData body needs the browser to set its own Content-Type (with
+  // the multipart boundary) - setting it ourselves to application/json
+  // would both be wrong and strip that boundary.
+  const isFormData = init.body instanceof FormData
 
   const response = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init.headers,
     },
@@ -51,6 +55,10 @@ export function apiGet<T>(path: string): Promise<T> {
 
 export function apiPost<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'POST', body: JSON.stringify(body) })
+}
+
+export function apiPostForm<T>(path: string, formData: FormData): Promise<T> {
+  return request<T>(path, { method: 'POST', body: formData })
 }
 
 export function apiPatch<T>(path: string, body: unknown): Promise<T> {

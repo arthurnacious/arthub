@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, apiDelete, apiGet, apiPatch, apiPost } from './http'
+import { ApiError, apiDelete, apiGet, apiPatch, apiPost, apiPostForm } from './http'
 import { authStore } from '../../stores/auth-store'
 
 function jsonResponse(body: unknown, status = 200) {
@@ -58,6 +58,20 @@ describe('http client', () => {
     const [, init] = fetchMock.mock.calls[0]
     expect(init.method).toBe('POST')
     expect(init.body).toBe(JSON.stringify({ company: 'Nimbus' }))
+  })
+
+  it('sends a FormData body on apiPostForm without a Content-Type header', async () => {
+    const fetchMock = vi.fn().mockImplementation(() => jsonResponse({ data: [] }, 201))
+    vi.stubGlobal('fetch', fetchMock)
+    const formData = new FormData()
+    formData.append('images', new File(['x'], 'a.png'))
+
+    await apiPostForm('/projects/1/images', formData)
+
+    const [, init] = fetchMock.mock.calls[0]
+    expect(init.method).toBe('POST')
+    expect(init.body).toBe(formData)
+    expect((init.headers as Record<string, string>)['Content-Type']).toBeUndefined()
   })
 
   it('sends PATCH and DELETE with the right method', async () => {
