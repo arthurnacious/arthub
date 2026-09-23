@@ -112,3 +112,82 @@ it('rejects a reset token that is not actually a password-reset token', function
 it('rejects a garbage reset token', function () {
     expect(make_auth_service()->resetPassword('not-a-real-token', 'new-password'))->toBeFalse();
 });
+
+it('updates a profile\'s name and email', function () {
+    $userId = create_test_user(email: 'old@example.com', name: 'Old Name');
+
+    $updated = make_auth_service()->updateProfile($userId, 'New Name', 'new@example.com');
+
+    expect($updated)->not->toBeNull()
+        ->and($updated['name'])->toBe('New Name')
+        ->and($updated['email'])->toBe('new@example.com');
+});
+
+it('logs an activity entry when a profile is updated', function () {
+    $userId = create_test_user(email: 'old@example.com', name: 'Old Name');
+
+    make_auth_service()->updateProfile($userId, 'New Name', 'new@example.com');
+
+    $row = test_connection()->pdo()
+        ->query('SELECT * FROM activity_log ORDER BY id DESC LIMIT 1')
+        ->fetch();
+
+    expect($row['action'])->toBe('auth.profile_updated')
+        ->and($row['user_id'])->toBe($userId);
+});
+
+it('rejects a profile update to an email already used by someone else', function () {
+    create_test_user(email: 'taken@example.com');
+    $userId = create_test_user(email: 'mine@example.com');
+
+    $updated = make_auth_service()->updateProfile($userId, 'New Name', 'taken@example.com');
+
+    expect($updated)->toBeNull();
+});
+
+it('allows a profile update that keeps the same email', function () {
+    $userId = create_test_user(email: 'mine@example.com', name: 'Old Name');
+
+    $updated = make_auth_service()->updateProfile($userId, 'New Name', 'mine@example.com');
+
+    expect($updated)->not->toBeNull()
+        ->and($updated['name'])->toBe('New Name');
+});
+
+it('changes a password given the correct current password', function () {
+    $userId = create_test_user(email: 'pw@example.com', password: 'old-password');
+    $service = make_auth_service();
+
+    $ok = $service->changePassword($userId, 'old-password', 'new-password');
+
+    expect($ok)->toBeTrue()
+        ->and($service->attempt('pw@example.com', 'new-password'))->toBeString()
+        ->and($service->attempt('pw@example.com', 'old-password'))->toBeNull();
+});
+
+it('logs an activity entry when a password is changed', function () {
+    $userId = create_test_user(email: 'pw@example.com', password: 'old-password');
+
+    make_auth_service()->changePassword($userId, 'old-password', 'new-password');
+
+    $row = test_connection()->pdo()
+        ->query('SELECT * FROM activity_log ORDER BY id DESC LIMIT 1')
+        ->fetch();
+
+    expect($row['action'])->toBe('auth.password_changed')
+        ->and($row['user_id'])->toBe($userId);
+});
+
+it('rejects changing a password with the wrong current password', function () {
+    $userId = create_test_user(email: 'pw@example.com', password: 'old-password');
+
+    $ok = make_auth_service()->changePassword($userId, 'wrong-password', 'new-password');
+
+    expect($ok)->toBeFalse();
+});
+
+it('rejects changing a password for an unknown user', function () {
+    $ok = make_auth_service()->changePassword('00000000-0000-0000-0000-000000000000', 'x', 'new-password');
+
+    expect($ok)->toBeFalse();
+});

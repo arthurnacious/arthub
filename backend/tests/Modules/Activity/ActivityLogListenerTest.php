@@ -9,7 +9,9 @@ use App\Events\InvoiceCreated;
 use App\Events\InvoiceDeleted;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceUpdated;
+use App\Events\PasswordChanged;
 use App\Events\PasswordWasReset;
+use App\Events\ProfileUpdated;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
 use App\Events\ProjectUpdated;
@@ -200,5 +202,25 @@ it('translates PasswordWasReset into an auth.password_reset row', function () {
 
     $row = latest_activity_log_row('auth.password_reset');
     expect($row['description'])->toBe('Password was reset')
+        ->and($row['user_id'])->toBe($userId);
+});
+
+it('translates ProfileUpdated into an auth.profile_updated row', function () {
+    $userId = create_test_user(email: 'listener-profile@test.com');
+
+    make_activity_log_listener()->onProfileUpdated(new ProfileUpdated($userId, 'Dana Lee'));
+
+    $row = latest_activity_log_row('auth.profile_updated');
+    expect($row['description'])->toBe('Updated profile for Dana Lee')
+        ->and($row['user_id'])->toBe($userId);
+});
+
+it('translates PasswordChanged into an auth.password_changed row', function () {
+    $userId = create_test_user(email: 'listener-changed@test.com');
+
+    make_activity_log_listener()->onPasswordChanged(new PasswordChanged($userId));
+
+    $row = latest_activity_log_row('auth.password_changed');
+    expect($row['description'])->toBe('Password was changed')
         ->and($row['user_id'])->toBe($userId);
 });

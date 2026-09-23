@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Modules\Auth;
 
 use App\Mail\Mailer;
+use App\Modules\Auth\Dto\ChangePasswordDto;
 use App\Modules\Auth\Dto\ForgotPasswordDto;
 use App\Modules\Auth\Dto\LoginDto;
 use App\Modules\Auth\Dto\ResetPasswordDto;
+use App\Modules\Auth\Dto\UpdateProfileDto;
+use App\Modules\Auth\Middleware\AuthenticateMiddleware;
 use App\Modules\Auth\Services\AuthService;
 use Hyperdrive\Attributes\Http\Route;
+use Hyperdrive\Attributes\Http\Verbs\Get;
+use Hyperdrive\Attributes\Http\Verbs\Patch;
 use Hyperdrive\Attributes\Http\Verbs\Post;
+use Hyperdrive\Attributes\Middleware;
+use Hyperdrive\Http\Request;
 use Hyperdrive\Http\Response;
 
 #[Route('/auth')]
@@ -57,5 +64,59 @@ class AuthController
         }
 
         return Response::json(['message' => 'Password updated.']);
+    }
+
+    #[Get('/me')]
+    #[Middleware([AuthenticateMiddleware::class])]
+    public function me(Request $request): Response
+    {
+        $user = $this->auth->findById($request->getAttribute('auth_user')['sub']);
+
+        if ($user === null) {
+            return Response::json(['error' => 'User not found'], 404);
+        }
+
+        return Response::json($this->present($user));
+    }
+
+    #[Patch('/me')]
+    #[Middleware([AuthenticateMiddleware::class])]
+    public function updateMe(UpdateProfileDto $dto, Request $request): Response
+    {
+        $userId = $request->getAttribute('auth_user')['sub'];
+        $updated = $this->auth->updateProfile($userId, $dto->name, $dto->email);
+
+        if ($updated === null) {
+            return Response::json(['error' => 'That email is already in use'], 422);
+        }
+
+        return Response::json($this->present($updated));
+    }
+
+    #[Post('/change-password')]
+    #[Middleware([AuthenticateMiddleware::class])]
+    public function changePassword(ChangePasswordDto $dto, Request $request): Response
+    {
+        $userId = $request->getAttribute('auth_user')['sub'];
+
+        if (!$this->auth->changePassword($userId, $dto->currentPassword, $dto->newPassword)) {
+            return Response::json(['error' => 'Current password is incorrect'], 422);
+        }
+
+        return Response::json(['message' => 'Password updated.']);
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @return array<string, mixed>
+     */
+    private function present(array $user): array
+    {
+        return [
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'role' => $user['role'],
+        ];
     }
 }

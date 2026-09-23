@@ -11,7 +11,9 @@ use App\Events\InvoiceCreated;
 use App\Events\InvoiceDeleted;
 use App\Events\InvoicePaid;
 use App\Events\InvoiceUpdated;
+use App\Events\PasswordChanged;
 use App\Events\PasswordWasReset;
+use App\Events\ProfileUpdated;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
 use App\Events\ProjectUpdated;
@@ -199,5 +201,17 @@ class ActivityLogListener
     public function onPasswordWasReset(PasswordWasReset $event): void
     {
         $this->logger->log('auth.password_reset', 'Password was reset', $event->userId);
+    }
+
+    #[Listener(ProfileUpdated::class)]
+    public function onProfileUpdated(ProfileUpdated $event): void
+    {
+        $this->logger->log('auth.profile_updated', "Updated profile for {$event->name}", $event->userId);
+    }
+
+    #[Listener(PasswordChanged::class)]
+    public function onPasswordChanged(PasswordChanged $event): void
+    {
+        $this->logger->log('auth.password_changed', 'Password was changed', $event->userId);
     }
 }
