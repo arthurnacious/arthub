@@ -21,6 +21,8 @@ import { Route as ClientsIndexRouteImport } from './routes/clients.index'
 import { Route as ClientsClientIdRouteImport } from './routes/clients.$clientId'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
+import { Route as QuotesIndexRouteImport } from './routes/quotes.index'
+import { Route as QuotesQuoteIdRouteImport } from './routes/quotes.$quoteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +84,16 @@ const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
   path: '/$projectId',
   getParentRoute: () => ProjectsRoute,
 } as any)
+const QuotesIndexRoute = QuotesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => QuotesRoute,
+} as any)
+const QuotesQuoteIdRoute = QuotesQuoteIdRouteImport.update({
+  id: '/$quoteId',
+  path: '/$quoteId',
+  getParentRoute: () => QuotesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -91,11 +103,13 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRouteWithChildren
-  '/quotes': typeof QuotesRoute
+  '/quotes': typeof QuotesRouteWithChildren
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients/': typeof ClientsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/quotes/': typeof QuotesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,11 +117,12 @@ export interface FileRoutesByTo {
   '/invoices': typeof InvoicesRoute
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
-  '/quotes': typeof QuotesRoute
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients': typeof ClientsIndexRoute
   '/projects': typeof ProjectsIndexRoute
+  '/quotes': typeof QuotesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,11 +133,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/projects': typeof ProjectsRouteWithChildren
-  '/quotes': typeof QuotesRoute
+  '/quotes': typeof QuotesRouteWithChildren
   '/clients/$clientId': typeof ClientsClientIdRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/quotes/$quoteId': typeof QuotesQuoteIdRoute
   '/clients/': typeof ClientsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
+  '/quotes/': typeof QuotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,8 +154,10 @@ export interface FileRouteTypes {
     | '/quotes'
     | '/clients/$clientId'
     | '/projects/$projectId'
+    | '/quotes/$quoteId'
     | '/clients/'
     | '/projects/'
+    | '/quotes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -146,11 +165,12 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/login'
     | '/profile'
-    | '/quotes'
     | '/clients/$clientId'
     | '/projects/$projectId'
+    | '/quotes/$quoteId'
     | '/clients'
     | '/projects'
+    | '/quotes'
   id:
     | '__root__'
     | '/'
@@ -163,8 +183,10 @@ export interface FileRouteTypes {
     | '/quotes'
     | '/clients/$clientId'
     | '/projects/$projectId'
+    | '/quotes/$quoteId'
     | '/clients/'
     | '/projects/'
+    | '/quotes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -175,7 +197,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
-  QuotesRoute: typeof QuotesRoute
+  QuotesRoute: typeof QuotesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +286,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdRouteImport
       parentRoute: typeof ProjectsRoute
     }
+    '/quotes/': {
+      id: '/quotes/'
+      path: '/'
+      fullPath: '/quotes/'
+      preLoaderRoute: typeof QuotesIndexRouteImport
+      parentRoute: typeof QuotesRoute
+    }
+    '/quotes/$quoteId': {
+      id: '/quotes/$quoteId'
+      path: '/$quoteId'
+      fullPath: '/quotes/$quoteId'
+      preLoaderRoute: typeof QuotesQuoteIdRouteImport
+      parentRoute: typeof QuotesRoute
+    }
   }
 }
 
@@ -294,6 +330,19 @@ const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
   ProjectsRouteChildren,
 )
 
+interface QuotesRouteChildren {
+  QuotesQuoteIdRoute: typeof QuotesQuoteIdRoute
+  QuotesIndexRoute: typeof QuotesIndexRoute
+}
+
+const QuotesRouteChildren: QuotesRouteChildren = {
+  QuotesQuoteIdRoute: QuotesQuoteIdRoute,
+  QuotesIndexRoute: QuotesIndexRoute,
+}
+
+const QuotesRouteWithChildren =
+  QuotesRoute._addFileChildren(QuotesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ActivityRoute: ActivityRoute,
@@ -302,7 +351,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
-  QuotesRoute: QuotesRoute,
+  QuotesRoute: QuotesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

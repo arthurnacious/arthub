@@ -1,14 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import { authStore } from '../stores/auth-store'
 
-export const Route = createFileRoute('/quotes')({ component: QuotesPage })
-
-function QuotesPage() {
-  return (
-    <div>
-      <h1 className="glow-text text-lg font-bold text-[var(--accent)]">QUOTES</h1>
-      <p className="mt-2 text-sm text-[var(--text-dim)]">
-        // coming soon: quote list wired to the backend
-      </p>
-    </div>
-  )
-}
+// Pathless layout: /quotes (table, quotes.index.tsx) and /quotes/$quoteId
+// (detail, quotes.$quoteId.tsx) are unrelated pages that just share this
+// URL prefix - same pattern as clients.tsx/projects.tsx.
+export const Route = createFileRoute('/quotes')({
+  beforeLoad: () => {
+    if (typeof window === 'undefined') return
+    if (authStore.store.state.token === null) {
+      throw redirect({ to: '/login' })
+    }
+  },
+  component: () => <Outlet />,
+})
