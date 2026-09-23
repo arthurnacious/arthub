@@ -50,7 +50,7 @@ function ProjectDetailPage() {
   const { confirm, dialog } = useConfirm()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isPending, isError } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => fetchProject(projectId),
   })
@@ -124,8 +124,26 @@ function ProjectDetailPage() {
     deleteImageMutation.mutate(imageId)
   }
 
-  if (isLoading) {
+  if (isPending) {
     return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+  }
+
+  if (isError) {
+    return (
+      <div>
+        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD PROJECT</h1>
+        <p className="mt-2 text-sm text-red-400">
+          Something went wrong fetching this project. Try refreshing the page.
+        </p>
+        <Link
+          to="/projects"
+          search={{ q: '', category: '' }}
+          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
+        >
+          &larr; back to projects
+        </Link>
+      </div>
+    )
   }
 
   if (!project || !form) {

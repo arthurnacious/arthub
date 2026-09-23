@@ -61,7 +61,7 @@ function ClientsPage() {
   // page/q live in the URL and drive the query key, so each page or search
   // change is its own server request - not an in-memory filter over
   // everything already fetched.
-  const { data, isLoading } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ['clients', { page, pageSize: PAGE_SIZE, search: q }],
     queryFn: () => fetchClients({ page, pageSize: PAGE_SIZE, search: q }),
     placeholderData: (previousData) => previousData,
@@ -121,7 +121,7 @@ function ClientsPage() {
             placeholder="search company, contact or email..."
             className="mb-4 w-full rounded border border-[var(--border)] bg-transparent px-3 py-1.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-dim)] focus:border-[var(--accent)]"
           />
-          {isLoading ? (
+          {isPending ? (
             <p className="text-sm text-[var(--text-dim)]">loading...</p>
           ) : (
             <>

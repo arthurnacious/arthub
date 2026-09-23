@@ -27,7 +27,7 @@ function ClientDetailPage() {
   const { edit: editFromUrl } = Route.useSearch()
   const queryClient = useQueryClient()
 
-  const { data: client, isLoading } = useQuery({
+  const { data: client, isPending, isError } = useQuery({
     queryKey: ['client', clientId],
     queryFn: () => fetchClient(clientId),
   })
@@ -48,8 +48,26 @@ function ClientDetailPage() {
     },
   })
 
-  if (isLoading) {
+  if (isPending) {
     return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+  }
+
+  if (isError) {
+    return (
+      <div>
+        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD CLIENT</h1>
+        <p className="mt-2 text-sm text-red-400">
+          Something went wrong fetching this client. Try refreshing the page.
+        </p>
+        <Link
+          to="/clients"
+          search={{ page: 1, q: '' }}
+          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
+        >
+          &larr; back to clients
+        </Link>
+      </div>
+    )
   }
 
   if (!client || !form) {

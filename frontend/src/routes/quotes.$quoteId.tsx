@@ -58,7 +58,7 @@ function QuoteDetailPage() {
   const queryClient = useQueryClient()
   const { confirm, dialog } = useConfirm()
 
-  const { data: quote, isLoading } = useQuery({
+  const { data: quote, isPending, isError } = useQuery({
     queryKey: ['quote', quoteId],
     queryFn: () => fetchQuote(quoteId),
   })
@@ -99,8 +99,26 @@ function QuoteDetailPage() {
     deleteMutation.mutate()
   }
 
-  if (isLoading) {
+  if (isPending) {
     return <p className="text-sm text-[var(--text-dim)]">loading...</p>
+  }
+
+  if (isError) {
+    return (
+      <div>
+        <h1 className="glow-text text-lg font-bold text-[var(--accent)]">COULDN'T LOAD QUOTE</h1>
+        <p className="mt-2 text-sm text-red-400">
+          Something went wrong fetching this quote. Try refreshing the page.
+        </p>
+        <Link
+          to="/quotes"
+          search={{ page: 1, q: '', status: '' }}
+          className="mt-4 inline-block text-sm text-[var(--accent)] hover:underline"
+        >
+          &larr; back to quotes
+        </Link>
+      </div>
+    )
   }
 
   if (!quote || !form) {

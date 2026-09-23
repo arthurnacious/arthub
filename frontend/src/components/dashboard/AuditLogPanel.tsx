@@ -31,7 +31,7 @@ export function AuditLogPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ['activity-log', { page, pageSize: PAGE_SIZE, search: q }],
     queryFn: () => fetchActivityLog({ page, pageSize: PAGE_SIZE, search: q }),
     placeholderData: (previousData) => previousData,
@@ -46,7 +46,7 @@ export function AuditLogPanel({
         placeholder="search action or description..."
         className="mb-4 w-full rounded border border-[var(--border)] bg-transparent px-3 py-1.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-dim)] focus:border-[var(--accent)]"
       />
-      {isLoading ? (
+      {isPending ? (
         <p className="text-sm text-[var(--text-dim)]">loading...</p>
       ) : isError ? (
         <p className="text-sm text-red-400">-- couldn't load the audit log --</p>

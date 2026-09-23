@@ -54,7 +54,7 @@ function ProjectsPage() {
 
   const {
     data,
-    isLoading,
+    isPending,
     isError,
     fetchNextPage,
     hasNextPage,
@@ -131,7 +131,7 @@ function ProjectsPage() {
       </div>
 
       <div className="mt-6">
-        {isLoading ? (
+        {isPending ? (
           <p className="text-sm text-[var(--text-dim)]">loading...</p>
         ) : isError ? (
           <p className="text-sm text-red-400">-- couldn't load projects --</p>

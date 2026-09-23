@@ -59,7 +59,7 @@ function QuotesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 
-  const { data, isLoading } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ['quotes', { page, pageSize: PAGE_SIZE, search: q, status }],
     queryFn: () => fetchQuotes({ page, pageSize: PAGE_SIZE, search: q, status }),
     placeholderData: (previousData) => previousData,
@@ -135,7 +135,7 @@ function QuotesPage() {
               ))}
             </select>
           </div>
-          {isLoading ? (
+          {isPending ? (
             <p className="text-sm text-[var(--text-dim)]">loading...</p>
           ) : (
             <>
