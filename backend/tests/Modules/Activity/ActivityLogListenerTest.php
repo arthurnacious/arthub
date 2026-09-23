@@ -5,6 +5,10 @@ declare(strict_types=1);
 use App\Events\ClientCreated;
 use App\Events\ClientDeleted;
 use App\Events\ClientUpdated;
+use App\Events\InvoiceCreated;
+use App\Events\InvoiceDeleted;
+use App\Events\InvoicePaid;
+use App\Events\InvoiceUpdated;
 use App\Events\PasswordWasReset;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
@@ -130,6 +134,51 @@ it('translates QuoteDeleted into a quote.deleted row', function () {
     expect($row['description'])->toBe('Deleted quote Q-0001')
         ->and($row['subject_type'])->toBe('quote')
         ->and($row['subject_id'])->toBe($quoteId);
+});
+
+it('translates InvoiceCreated into an invoice.created row', function () {
+    $invoiceId = create_test_invoice();
+
+    make_activity_log_listener()->onInvoiceCreated(new InvoiceCreated($invoiceId, 'INV-0001', null));
+
+    $row = latest_activity_log_row('invoice.created');
+    expect($row['description'])->toBe('Created invoice INV-0001')
+        ->and($row['subject_type'])->toBe('invoice')
+        ->and($row['subject_id'])->toBe($invoiceId);
+});
+
+it('translates InvoiceUpdated into an invoice.updated row', function () {
+    $invoiceId = create_test_invoice();
+
+    make_activity_log_listener()->onInvoiceUpdated(new InvoiceUpdated($invoiceId, 'INV-0001', null));
+
+    $row = latest_activity_log_row('invoice.updated');
+    expect($row['description'])->toBe('Updated invoice INV-0001')
+        ->and($row['subject_type'])->toBe('invoice')
+        ->and($row['subject_id'])->toBe($invoiceId);
+});
+
+it('translates InvoiceDeleted into an invoice.deleted row', function () {
+    $invoiceId = create_test_invoice();
+
+    make_activity_log_listener()->onInvoiceDeleted(new InvoiceDeleted($invoiceId, 'INV-0001', null));
+
+    $row = latest_activity_log_row('invoice.deleted');
+    expect($row['description'])->toBe('Deleted invoice INV-0001')
+        ->and($row['subject_type'])->toBe('invoice')
+        ->and($row['subject_id'])->toBe($invoiceId);
+});
+
+it('translates InvoicePaid into an invoice.paid row with the total in metadata', function () {
+    $invoiceId = create_test_invoice();
+
+    make_activity_log_listener()->onInvoicePaid(new InvoicePaid($invoiceId, 'INV-0001', 500.0, null));
+
+    $row = latest_activity_log_row('invoice.paid');
+    expect($row['description'])->toBe('Invoice INV-0001 marked paid')
+        ->and($row['subject_type'])->toBe('invoice')
+        ->and($row['subject_id'])->toBe($invoiceId)
+        ->and((float) json_decode($row['metadata'], true)['total'])->toBe(500.0);
 });
 
 it('translates UserLoggedIn into an auth.login row with no subject', function () {

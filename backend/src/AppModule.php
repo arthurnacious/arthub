@@ -8,6 +8,7 @@ use App\Modules\Activity\ActivityModule;
 use App\Modules\Auth\AuthModule;
 use App\Modules\Clients\ClientsModule;
 use App\Modules\Health\HealthController;
+use App\Modules\Invoices\InvoicesModule;
 use App\Modules\Projects\ProjectsModule;
 use App\Modules\Quotes\QuotesModule;
 use Hyperdrive\Application\Module;
@@ -21,6 +22,7 @@ use Hyperdrive\Application\Module;
         ClientsModule::class,
         ProjectsModule::class,
         QuotesModule::class,
+        InvoicesModule::class,
     ],
     controllers: [HealthController::class],
 )]

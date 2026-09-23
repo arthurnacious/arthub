@@ -205,3 +205,39 @@ function create_test_quote(
 
     return $statement->fetchColumn();
 }
+
+/**
+ * Inserts an invoice row (creating a project for it if none is given) and
+ * returns its id (a UUID string). No line items - tests that need them
+ * insert into invoice_lines directly, or go through the controller.
+ */
+function create_test_invoice(
+    ?string $projectId = null,
+    string $status = 'draft',
+    ?string $quoteId = null,
+    ?string $discountType = null,
+    float $discountValue = 0,
+): string {
+    $projectId ??= create_test_project();
+
+    $pdo = test_connection()->pdo();
+    $sequence = (int) $pdo->query("SELECT nextval('invoice_number_seq')")->fetchColumn();
+    $invoiceNumber = sprintf('INV-%04d', $sequence);
+
+    $statement = $pdo->prepare(<<<SQL
+        INSERT INTO invoices (project_id, quote_id, invoice_number, status, discount_type, discount_value)
+        VALUES (:project_id, :quote_id, :invoice_number, :status, :discount_type, :discount_value)
+        RETURNING id
+    SQL);
+
+    $statement->execute([
+        'project_id' => $projectId,
+        'quote_id' => $quoteId,
+        'invoice_number' => $invoiceNumber,
+        'status' => $status,
+        'discount_type' => $discountType,
+        'discount_value' => $discountValue,
+    ]);
+
+    return $statement->fetchColumn();
+}

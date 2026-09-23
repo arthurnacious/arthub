@@ -7,6 +7,10 @@ namespace App\Modules\Activity\Listeners;
 use App\Events\ClientCreated;
 use App\Events\ClientDeleted;
 use App\Events\ClientUpdated;
+use App\Events\InvoiceCreated;
+use App\Events\InvoiceDeleted;
+use App\Events\InvoicePaid;
+use App\Events\InvoiceUpdated;
 use App\Events\PasswordWasReset;
 use App\Events\ProjectCreated;
 use App\Events\ProjectDeleted;
@@ -133,6 +137,55 @@ class ActivityLogListener
             userId: $event->userId,
             subjectType: 'quote',
             subjectId: $event->quoteId,
+        );
+    }
+
+    #[Listener(InvoiceCreated::class)]
+    public function onInvoiceCreated(InvoiceCreated $event): void
+    {
+        $this->logger->log(
+            action: 'invoice.created',
+            description: "Created invoice {$event->invoiceNumber}",
+            userId: $event->userId,
+            subjectType: 'invoice',
+            subjectId: $event->invoiceId,
+        );
+    }
+
+    #[Listener(InvoiceUpdated::class)]
+    public function onInvoiceUpdated(InvoiceUpdated $event): void
+    {
+        $this->logger->log(
+            action: 'invoice.updated',
+            description: "Updated invoice {$event->invoiceNumber}",
+            userId: $event->userId,
+            subjectType: 'invoice',
+            subjectId: $event->invoiceId,
+        );
+    }
+
+    #[Listener(InvoiceDeleted::class)]
+    public function onInvoiceDeleted(InvoiceDeleted $event): void
+    {
+        $this->logger->log(
+            action: 'invoice.deleted',
+            description: "Deleted invoice {$event->invoiceNumber}",
+            userId: $event->userId,
+            subjectType: 'invoice',
+            subjectId: $event->invoiceId,
+        );
+    }
+
+    #[Listener(InvoicePaid::class)]
+    public function onInvoicePaid(InvoicePaid $event): void
+    {
+        $this->logger->log(
+            action: 'invoice.paid',
+            description: "Invoice {$event->invoiceNumber} marked paid",
+            userId: $event->userId,
+            subjectType: 'invoice',
+            subjectId: $event->invoiceId,
+            metadata: ['total' => $event->total],
         );
     }
 
