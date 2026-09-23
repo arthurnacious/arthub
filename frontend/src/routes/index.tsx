@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Panel } from '../components/Panel'
 import { ClientsStatCard } from '../components/dashboard/ClientsStatCard'
 import { ProjectsStatCard } from '../components/dashboard/ProjectsStatCard'
@@ -6,13 +6,22 @@ import { AuditLogPanel } from '../components/dashboard/AuditLogPanel'
 import { ActivityGraphPanel } from '../components/dashboard/ActivityGraphPanel'
 import { RevenuePanel } from '../components/dashboard/RevenuePanel'
 import { InvoiceStatusPanel } from '../components/dashboard/InvoiceStatusPanel'
+import { authStore } from '../stores/auth-store'
 
 interface DashboardSearch {
   page: number
   q: string
 }
 
+// Same client-only auth guard as clients.tsx/profile.tsx/etc - see those
+// for why it's client-only (the token lives in localStorage).
 export const Route = createFileRoute('/')({
+  beforeLoad: () => {
+    if (typeof window === 'undefined') return
+    if (authStore.store.state.token === null) {
+      throw redirect({ to: '/login' })
+    }
+  },
   validateSearch: (search: Record<string, unknown>): DashboardSearch => ({
     page: Number(search.page) > 0 ? Math.floor(Number(search.page)) : 1,
     q: typeof search.q === 'string' ? search.q : '',

@@ -55,6 +55,14 @@
 html,
 body {
   height: 100dvh;
+  /* Not just body: in standards mode the actual scrolling element is
+     <html> (document.scrollingElement), so a body-only overflow-hidden
+     still let mobile browsers pan the page horizontally whenever some
+     descendant's intrinsic width nudged past the viewport (e.g. a
+     flex/grid child that won't shrink below its content's min-content
+     size) - body clipped its own rendering, but html still let you
+     scroll to reveal the letterboxed edge. */
+  overflow-x: hidden;
 }
 
 body {
