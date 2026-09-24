@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
+
+const _fontFamily = 'JetBrains Mono';
 
 /// Dark-only, terminal/CRT styled theme matching the web frontend
 /// (frontend/src/styles.css + Panel.tsx/StatusBadge.tsx etc.) - JetBrains
@@ -10,19 +11,28 @@ import 'app_colors.dart';
 /// aesthetic layer that isn't attempted here; this covers the color and
 /// typography system, which is what actually needs to stay consistent
 /// for the two apps to feel like the same product.
+///
+/// The font is bundled as a local asset (see pubspec.yaml's `fonts:`
+/// section, assets/fonts/) rather than fetched at runtime via
+/// google_fonts - that package initially rendered every bit of text in
+/// this app invisible on web, since the whole theme's fontFamily
+/// depended on a network fetch that hadn't resolved yet by first paint.
+/// A bundled font has no such race, and works offline besides.
 class AppTheme {
   const AppTheme._();
 
   static ThemeData get dark {
-    final textTheme = GoogleFonts.jetBrainsMonoTextTheme(
-      ThemeData.dark().textTheme,
-    ).apply(bodyColor: AppColors.text, displayColor: AppColors.text);
+    final textTheme = ThemeData.dark().textTheme.apply(
+          fontFamily: _fontFamily,
+          bodyColor: AppColors.text,
+          displayColor: AppColors.text,
+        );
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: GoogleFonts.jetBrainsMono().fontFamily,
+      fontFamily: _fontFamily,
       textTheme: textTheme,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accent,
