@@ -21,12 +21,14 @@ panel-grid dashboard, a monospace font, vim-style keyboard navigation
 |---|---|
 | **Backend** | PHP 8.4+, [hyperdrive/framework](https://github.com/arthurnacious/hyperdrive), Postgres 18+ (UUIDv7 primary keys), OpenSwoole, PHPMailer, [Pest](https://pestphp.com/) |
 | **Frontend** | [TanStack Start](https://tanstack.com/start) (React), TanStack Router/Query/Store, Tailwind CSS v4, Vitest |
+| **App** | Flutter, flutter_bloc, go_router - see app/README.md (scaffold; one feature built out) |
 
 ## Layout
 
 ```
 backend/    the API - see backend/README.md
 frontend/   the dashboard UI - see frontend/README.md
+app/        Flutter client for the same API - see app/README.md
 ```
 
 The two are independent projects (separate dependency trees, separate test
