@@ -54,8 +54,25 @@ class AppTheme {
           letterSpacing: 0.5,
         ),
       ),
-      drawerTheme: const DrawerThemeData(
+      // The bottom nav bar (see AppShellPage) - bordered like every other
+      // chrome element in this theme rather than elevated/shadowed, with
+      // the accent color marking the selected destination.
+      navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.panel,
+        indicatorColor: AppColors.accentDim,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 11,
+            color: states.contains(WidgetState.selected) ? AppColors.accent : AppColors.textDim,
+          ),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected) ? AppColors.accent : AppColors.textDim,
+          ),
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColors.panel,
