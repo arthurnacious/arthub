@@ -12,10 +12,15 @@ This is a starting point, not a feature-complete app. What's wired up:
 - **Auth** - real login against `POST /auth/login`, session token in
   secure storage, restored (and re-verified via `GET /auth/me`) on app
   start, auto-logout on a 401 from any request.
-- **Navigation** - a drawer mirroring the web frontend's sidebar
-  (dashboard/clients/projects/quotes/invoices/activity), with an
-  `AuthBloc`-driven redirect guard (go_router) so every screen requires a
-  session, same as every route on the web app.
+- **Navigation** - a bottom `NavigationBar` (dashboard/clients/projects/
+  quotes/invoices - Material caps a bottom nav at 5 destinations, so
+  activity lives behind a history icon in the AppBar instead, pushed
+  rather than a tab), with an `AuthBloc`-driven redirect guard
+  (go_router) so every screen requires a session, same as every route on
+  the web app. This is deliberately *not* the web frontend's sidebar:
+  same look and feel (theme, panel chrome), but this is a real Android
+  app, and bottom nav is the idiomatic pattern for that, not a sidebar
+  meant for a wide desktop viewport.
 - **Clients** - the one fully-built-out feature: full CRUD. A searched,
   infinite-scroll list (`GET /clients`) that pushes a real detail screen
   (`GET /clients/{id}`) with in-place edit (`PATCH`) and delete
@@ -24,8 +29,8 @@ This is a starting point, not a feature-complete app. What's wired up:
   `ClientDetailBloc`/`ClientCreateBloc` are created per push via
   `Navigator`, not app-wide) - see `lib/features/clients/bloc/`.
 
-Everything else in the drawer (dashboard/projects/quotes/invoices/activity)
-is a placeholder screen. Follow `lib/features/clients/`'s
+Everything but clients (dashboard/projects/quotes/invoices/activity) is
+a placeholder screen. Follow `lib/features/clients/`'s
 `data/` → `bloc/` → `presentation/` split to build one out for real - see
 the corresponding controller under `../backend/src/Modules/` for the API
 shape, and the equivalent page under `../frontend/src/routes/` for what
