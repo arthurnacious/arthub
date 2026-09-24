@@ -1,5 +1,6 @@
 import '../../../core/network/api_client.dart';
 import 'client.dart';
+import 'client_input.dart';
 
 /// One page of a paginated list endpoint - every list endpoint in this
 /// API shares this envelope (see e.g. ClientsController::index()).
@@ -20,11 +21,7 @@ class ClientsPage {
 }
 
 /// Wraps the /clients endpoints - see
-/// backend/src/Modules/Clients/ClientsController.php. Only read (list)
-/// is implemented for this scaffold; create/update/delete follow the
-/// same request/response shape and are natural next additions once
-/// there's a form UI to drive them (see frontend's ClientForm.tsx for
-/// the field set: company, contact, email, status).
+/// backend/src/Modules/Clients/ClientsController.php.
 class ClientsRepository {
   ClientsRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
@@ -50,4 +47,21 @@ class ClientsRepository {
       total: body['total'] as int,
     );
   }
+
+  Future<Client> fetchClient(String id) async {
+    final body = await _apiClient.get('/clients/$id');
+    return Client.fromJson(body);
+  }
+
+  Future<Client> createClient(ClientInput input) async {
+    final body = await _apiClient.post('/clients', body: input.toJson());
+    return Client.fromJson(body);
+  }
+
+  Future<Client> updateClient(String id, ClientInput input) async {
+    final body = await _apiClient.patch('/clients/$id', body: input.toJson());
+    return Client.fromJson(body);
+  }
+
+  Future<void> deleteClient(String id) => _apiClient.delete('/clients/$id');
 }

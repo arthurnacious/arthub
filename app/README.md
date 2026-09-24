@@ -16,9 +16,13 @@ This is a starting point, not a feature-complete app. What's wired up:
   (dashboard/clients/projects/quotes/invoices/activity), with an
   `AuthBloc`-driven redirect guard (go_router) so every screen requires a
   session, same as every route on the web app.
-- **Clients** - the one fully-built-out feature: a searched,
-  infinite-scroll list backed by `GET /clients`. Read-only for now (no
-  create/update/delete forms yet).
+- **Clients** - the one fully-built-out feature: full CRUD. A searched,
+  infinite-scroll list (`GET /clients`) that pushes a real detail screen
+  (`GET /clients/{id}`) with in-place edit (`PATCH`) and delete
+  (`DELETE`, behind a confirm dialog), plus a "new client" screen
+  (`POST`). One bloc per screen instance (`ClientsBloc` is app-wide;
+  `ClientDetailBloc`/`ClientCreateBloc` are created per push via
+  `Navigator`, not app-wide) - see `lib/features/clients/bloc/`.
 
 Everything else in the drawer (dashboard/projects/quotes/invoices/activity)
 is a placeholder screen. Follow `lib/features/clients/`'s
