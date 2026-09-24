@@ -27,11 +27,11 @@ export function ProjectCard({ project, onClick }: { project: Project; onClick: (
       </div>
       <div className="flex flex-col gap-2 p-3">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-bold text-[var(--text)]">{project.name}</span>
+          <span className="min-w-0 truncate text-sm font-bold text-[var(--text)]">{project.name}</span>
           <StatusBadge label={project.status} tone={PROJECT_STATUS_TONE[project.status]} />
         </div>
         <div className="flex items-center justify-between gap-2 text-xs text-[var(--text-dim)]">
-          <span className="truncate">{project.clientName}</span>
+          <span className="min-w-0 truncate">{project.clientName}</span>
           <span className="shrink-0 rounded border border-[var(--border)] px-1.5 py-0.5 uppercase tracking-wider">
             {project.category}
           </span>
