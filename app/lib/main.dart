@@ -6,10 +6,13 @@ import 'core/network/api_client.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
+import 'features/activity/data/activity_repository.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/clients/bloc/clients_bloc.dart';
 import 'features/clients/data/clients_repository.dart';
+import 'features/invoices/data/invoices_repository.dart';
+import 'features/projects/data/projects_repository.dart';
 
 void main() {
   runApp(const ArthubApp());
@@ -24,6 +27,9 @@ class ArthubApp extends StatefulWidget {
 
 class _ArthubAppState extends State<ArthubApp> {
   late final ClientsRepository _clientsRepository;
+  late final ProjectsRepository _projectsRepository;
+  late final InvoicesRepository _invoicesRepository;
+  late final ActivityRepository _activityRepository;
   late final AuthBloc _authBloc;
   late final ClientsBloc _clientsBloc;
   late final GoRouter _router;
@@ -44,6 +50,9 @@ class _ArthubAppState extends State<ArthubApp> {
     );
     final authRepository = AuthRepository(apiClient: apiClient, tokenStorage: tokenStorage);
     _clientsRepository = ClientsRepository(apiClient: apiClient);
+    _projectsRepository = ProjectsRepository(apiClient: apiClient);
+    _invoicesRepository = InvoicesRepository(apiClient: apiClient);
+    _activityRepository = ActivityRepository(apiClient: apiClient);
 
     _authBloc = AuthBloc(authRepository: authRepository)..add(const AuthCheckRequested());
     _clientsBloc = ClientsBloc(clientsRepository: _clientsRepository);
@@ -60,12 +69,16 @@ class _ArthubAppState extends State<ArthubApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      // Exposed so per-screen blocs pushed via Navigator (client detail,
-      // client create - see clients_page.dart) can build their own
-      // ClientDetailBloc/ClientCreateBloc from it, without ArthubApp
-      // needing to know those screens exist.
-      value: _clientsRepository,
+    return MultiRepositoryProvider(
+      // Exposed so per-screen blocs pushed via Navigator (client detail/
+      // create, the dashboard's panels) can build their own blocs from
+      // these, without ArthubApp needing to know those screens exist.
+      providers: [
+        RepositoryProvider.value(value: _clientsRepository),
+        RepositoryProvider.value(value: _projectsRepository),
+        RepositoryProvider.value(value: _invoicesRepository),
+        RepositoryProvider.value(value: _activityRepository),
+      ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: _authBloc),

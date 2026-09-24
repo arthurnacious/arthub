@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/coming_soon_page.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../clients/presentation/clients_page.dart';
+import '../../dashboard/presentation/dashboard_page.dart';
 
 class _NavEntry {
   const _NavEntry(this.label, this.icon, this.builder);
@@ -22,7 +23,7 @@ class _NavEntry {
 // lives behind the AppBar's history icon instead (pushed, not a tab) -
 // see _openActivity below.
 final _navEntries = <_NavEntry>[
-  _NavEntry('dashboard', Icons.dashboard_outlined, (_) => const ComingSoonPage(section: 'dashboard')),
+  _NavEntry('dashboard', Icons.dashboard_outlined, (_) => const DashboardPage()),
   _NavEntry('clients', Icons.groups_outlined, (_) => const ClientsPage()),
   _NavEntry('projects', Icons.work_outline, (_) => const ComingSoonPage(section: 'projects')),
   _NavEntry('quotes', Icons.description_outlined, (_) => const ComingSoonPage(section: 'quotes')),

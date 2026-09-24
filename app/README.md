@@ -21,20 +21,31 @@ This is a starting point, not a feature-complete app. What's wired up:
   same look and feel (theme, panel chrome), but this is a real Android
   app, and bottom nav is the idiomatic pattern for that, not a sidebar
   meant for a wide desktop viewport.
-- **Clients** - the one fully-built-out feature: full CRUD. A searched,
+- **Clients** - the one fully-built-out CRUD feature. A searched,
   infinite-scroll list (`GET /clients`) that pushes a real detail screen
   (`GET /clients/{id}`) with in-place edit (`PATCH`) and delete
   (`DELETE`, behind a confirm dialog), plus a "new client" screen
   (`POST`). One bloc per screen instance (`ClientsBloc` is app-wide;
   `ClientDetailBloc`/`ClientCreateBloc` are created per push via
   `Navigator`, not app-wide) - see `lib/features/clients/bloc/`.
+- **Dashboard** - three independent panels (`status`, `invoice_status`,
+  `recent_activity`), each its own bloc, matching the web frontend's
+  "each panel fetches its own data independently" dashboard philosophy
+  (frontend/src/routes/index.tsx) - one panel's error/loading state
+  never blocks another's. No activity heatmap or revenue chart here
+  (the web dashboard's `activity_graph`/`revenue` panels) - those are
+  rendered as plain numbers instead of charts, a reasonable follow-up
+  rather than something this pass attempted. `lib/features/projects/`,
+  `lib/features/invoices/`, `lib/features/activity/` exist only as
+  thin, dashboard-scoped repositories (a project count, an invoice list
+  for aggregation, a recent-activity list) - not full features yet.
 
-Everything but clients (dashboard/projects/quotes/invoices/activity) is
-a placeholder screen. Follow `lib/features/clients/`'s
-`data/` → `bloc/` → `presentation/` split to build one out for real - see
-the corresponding controller under `../backend/src/Modules/` for the API
-shape, and the equivalent page under `../frontend/src/routes/` for what
-it should end up looking like.
+Everything but clients and the dashboard (projects/quotes/invoices/
+activity as their own screens) is a placeholder. Follow
+`lib/features/clients/`'s `data/` → `bloc/` → `presentation/` split to
+build one out for real - see the corresponding controller under
+`../backend/src/Modules/` for the API shape, and the equivalent page
+under `../frontend/src/routes/` for what it should end up looking like.
 
 ## Setup
 
@@ -65,12 +76,14 @@ flutter run --dart-define=API_BASE_URL=http://localhost:9501  # iOS simulator
 flutter test
 ```
 
-Model/exception parsing and presentational widgets are unit/widget
-tested (see `test/`). Nothing exercises `ApiClient`/the repositories yet -
-they're plain classes rather than built against an interface, so doing
-that properly means introducing a repository interface first (an
-abstract `ClientsRepository` a fake can implement) rather than mocking
-`Dio` directly.
+Model/exception parsing, presentational widgets, and the dashboard's
+blocs are all tested (see `test/`) - the bloc tests use `bloc_test`
+against fake repositories (a subclass overriding just the methods
+under test, since repositories are plain classes rather than built
+against an interface - `ApiClient`'s constructor still needs a real
+`TokenStorage`/`Dio`, but nothing in a fake ever calls through it).
+`ClientsBloc` and its screens don't have this treatment yet; the same
+fake-subclass approach works there too.
 
 ## Notable pieces
 
