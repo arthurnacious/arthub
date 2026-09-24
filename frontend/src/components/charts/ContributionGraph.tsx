@@ -1,3 +1,5 @@
+import { formatLocalDate, parseLocalDate } from '../../lib/local-date'
+
 export interface ContributionDay {
   date: string // ISO YYYY-MM-DD
   count: number
@@ -11,20 +13,6 @@ const MONTH_NAMES = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ]
-
-// Local-time date helpers (not UTC / toISOString round-tripping), so this
-// never shifts a day depending on the viewer's timezone offset.
-function parseLocalDate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
-function formatLocalDate(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
 
 function levelFor(count: number): 0 | 1 | 2 | 3 | 4 {
   if (count <= 0) return 0

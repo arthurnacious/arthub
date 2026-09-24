@@ -89,3 +89,41 @@ it('matches a search term against the action too', function () {
     expect($body['data'])->toHaveCount(1)
         ->and($body['data'][0]['action'])->toBe('auth.login');
 });
+
+it('groups activity into one row per day for the heatmap', function () {
+    $logger = new ActivityLogger(test_connection());
+    $logger->log('client.created', 'Event one');
+    $logger->log('client.created', 'Event two');
+
+    $response = make_activity_controller()->heatmap(new Request());
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($body['data'])->toHaveCount(1)
+        ->and($body['data'][0]['date'])->toBe(date('Y-m-d'))
+        ->and($body['data'][0]['count'])->toBe(2);
+});
+
+it('excludes activity older than the requested day window', function () {
+    $pdo = test_connection()->pdo();
+    $pdo->prepare(<<<SQL
+        INSERT INTO activity_log (action, description, created_at)
+        VALUES ('client.created', 'Old event', NOW() - INTERVAL '10 days')
+    SQL)->execute();
+    (new ActivityLogger(test_connection()))->log('client.created', 'Recent event');
+
+    $response = make_activity_controller()->heatmap(new Request(query: ['days' => '5']));
+    $body = json_decode($response->getContent(), true);
+
+    expect($body['data'])->toHaveCount(1)
+        ->and($body['data'][0]['date'])->toBe(date('Y-m-d'))
+        ->and($body['data'][0]['count'])->toBe(1);
+});
+
+it('returns no rows for the heatmap when nothing has happened yet', function () {
+    $response = make_activity_controller()->heatmap(new Request());
+    $body = json_decode($response->getContent(), true);
+
+    expect($response->getStatusCode())->toBe(200)
+        ->and($body['data'])->toBe([]);
+});

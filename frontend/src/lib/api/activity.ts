@@ -36,3 +36,17 @@ export function fetchActivityLog({
 
   return apiGet<PaginatedResult<ActivityEntry>>(`/activity-log?${params.toString()}`)
 }
+
+export interface ActivityHeatmapDay {
+  date: string // ISO YYYY-MM-DD
+  count: number
+}
+
+// GET /activity-log/heatmap?days= - one row per day that had at least one
+// event in the trailing window (days with none are just absent; see
+// ActivityGraphPanel for how the gaps get filled in). Backs the
+// dashboard's GitHub-style contribution graph.
+export async function fetchActivityHeatmap(days = 371): Promise<ActivityHeatmapDay[]> {
+  const { data } = await apiGet<{ data: ActivityHeatmapDay[] }>(`/activity-log/heatmap?days=${days}`)
+  return data
+}
