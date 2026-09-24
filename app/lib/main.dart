@@ -23,6 +23,7 @@ class ArthubApp extends StatefulWidget {
 }
 
 class _ArthubAppState extends State<ArthubApp> {
+  late final ClientsRepository _clientsRepository;
   late final AuthBloc _authBloc;
   late final ClientsBloc _clientsBloc;
   late final GoRouter _router;
@@ -42,10 +43,10 @@ class _ArthubAppState extends State<ArthubApp> {
       onUnauthorized: () => _authBloc.add(const AuthLogoutRequested()),
     );
     final authRepository = AuthRepository(apiClient: apiClient, tokenStorage: tokenStorage);
-    final clientsRepository = ClientsRepository(apiClient: apiClient);
+    _clientsRepository = ClientsRepository(apiClient: apiClient);
 
     _authBloc = AuthBloc(authRepository: authRepository)..add(const AuthCheckRequested());
-    _clientsBloc = ClientsBloc(clientsRepository: clientsRepository);
+    _clientsBloc = ClientsBloc(clientsRepository: _clientsRepository);
     _router = buildAppRouter(_authBloc);
   }
 
@@ -59,18 +60,25 @@ class _ArthubAppState extends State<ArthubApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _authBloc),
-        BlocProvider.value(value: _clientsBloc),
-      ],
-      child: MaterialApp.router(
-        title: 'Arthub',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
-        routerConfig: _router,
+    return RepositoryProvider.value(
+      // Exposed so per-screen blocs pushed via Navigator (client detail,
+      // client create - see clients_page.dart) can build their own
+      // ClientDetailBloc/ClientCreateBloc from it, without ArthubApp
+      // needing to know those screens exist.
+      value: _clientsRepository,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: _authBloc),
+          BlocProvider.value(value: _clientsBloc),
+        ],
+        child: MaterialApp.router(
+          title: 'Arthub',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.dark,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
+          routerConfig: _router,
+        ),
       ),
     );
   }
