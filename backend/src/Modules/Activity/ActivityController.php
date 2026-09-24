@@ -69,4 +69,39 @@ class ActivityController
             'total' => $total,
         ]);
     }
+
+    // Backs the dashboard's GitHub-style contribution graph: one row per
+    // day that had at least one event, in the trailing `days` window
+    // (default 371 - 53 weeks, same span the frontend used to fake with
+    // generateMockActivity). Days with no activity are simply absent -
+    // ContributionGraph fills those in as zero itself, so there's no need
+    // to return a row for every single day here.
+    #[Get('/heatmap')]
+    public function heatmap(Request $request): Response
+    {
+        $days = max(1, min(400, (int) $request->query('days', 371)));
+
+        // created_at::date (not an explicit AT TIME ZONE conversion) uses
+        // the connection's session timezone, same as every other
+        // created_at read/display in this app - so "day" here lines up
+        // with what a relative-time/date display elsewhere would call
+        // "today", rather than forcing a UTC day boundary that could be
+        // off by one from the frontend's own local-time date handling
+        // (see ContributionGraph.tsx).
+        $statement = $this->connection->pdo()->prepare(<<<SQL
+            SELECT created_at::date AS date, COUNT(*) AS count
+            FROM activity_log
+            WHERE created_at >= NOW() - make_interval(days => :days)
+            GROUP BY date
+            ORDER BY date ASC
+        SQL);
+        $statement->execute(['days' => $days]);
+
+        return Response::json([
+            'data' => array_map(
+                fn (array $row) => ['date' => $row['date'], 'count' => (int) $row['count']],
+                $statement->fetchAll(),
+            ),
+        ]);
+    }
 }

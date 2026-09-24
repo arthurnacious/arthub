@@ -38,9 +38,6 @@ function Home() {
   return (
     <div>
       <h1 className="glow-text text-lg font-bold text-[var(--accent)]">DASHBOARD</h1>
-      <p className="mt-2 text-sm text-[var(--text-dim)]">
-        // activity_graph below is still a placeholder - no daily activity aggregation endpoint yet
-      </p>
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Panel title="status">
           <ul className="flex flex-col gap-2 text-sm">
