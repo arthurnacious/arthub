@@ -1,0 +1,17 @@
+[package]
+name = "content"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Portfolio content: static types for the site, owned/serializable mirrors for the database, plus a build-time loader."
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = { version = "1", optional = true }
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"], optional = true }
+imagesize = { version = "0.15", optional = true }
+
+[features]
+# The loader/validator/codegen. Used by build scripts and the native game
+# room; never compiled into the browser bundle.
+parse = ["dep:toml", "dep:pulldown-cmark", "dep:imagesize"]

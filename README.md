@@ -1,75 +1,94 @@
-# Arthub
+# ARTHUB
 
-A self-hosted CRM for a freelancer to run their own client work: companies
-(clients) → projects → quotes → invoices, with discounts, line items, and a
-terminal-style activity log of everything that happens. Built by one person,
-for that same person's own freelance business - not a multi-tenant SaaS.
+Portfolio of Arthurnacious Monethi. Rust end to end: a Leptos site (SSR + hydration) served by a NestForge/Axum backend, and a Bevy game room compiled to WebAssembly.
 
-It's also the first real application built on top of
-[`hyperdrive/framework`](https://github.com/arthurnacious/hyperdrive), a
-NestJS-inspired PHP framework - so it doubles as a proving ground for that
-framework in a non-trivial, real-world app.
+## Run it
 
-The frontend leans hard into a dark, retro-terminal aesthetic: a bordered
-panel-grid dashboard, a monospace font, vim-style keyboard navigation
-(`j`/`k`/`g`/`G`/`h`/`l`), and a `:`-prefixed command bar (`:ls`, `:cd
-<route>`) for getting around without touching the mouse.
+```sh
+rustup target add wasm32-unknown-unknown   # once
+cargo install cargo-leptos just --locked   # once
+cp .env.example .env                       # optional: email settings for the contact form
+just dev                                   # builds the room if needed, then http://127.0.0.1:3000
+```
 
-## Stack
-
-| | |
+| command | does |
 |---|---|
-| **Backend** | PHP 8.4+, [hyperdrive/framework](https://github.com/arthurnacious/hyperdrive), Postgres 18+ (UUIDv7 primary keys), OpenSwoole, PHPMailer, [Pest](https://pestphp.com/) |
-| **Frontend** | [TanStack Start](https://tanstack.com/start) (React), TanStack Router/Query/Store, Tailwind CSS v4, Vitest |
-| **App** | Flutter, flutter_bloc, go_router - see app/README.md (scaffold; one feature built out) |
+| `just dev` | room bundle (no-op if unchanged) + `cargo leptos watch` |
+| `just build` | production build: room bundle + `cargo leptos build --release` |
+| `just test` | every crate's tests, including the server's per-module route tests |
+| `just check` | fmt, clippy (native and wasm targets) |
+| `just build-room` | rebuild the game room WASM (safe while the site is running) |
+| `just room` | run the game room natively |
+| `just test-email` | send one real email through the configured provider |
+| `just fetch-textures` / `just bake-textures` | refresh the room's PBR textures |
+| `just portrait photo.jpg` | regenerate both portraits: the low-poly painting in the room and the ASCII one on the home page |
 
 ## Layout
 
 ```
-backend/    the API - see backend/README.md
-frontend/   the dashboard UI - see frontend/README.md
-app/        Flutter client for the same API - see app/README.md
+crates/
+  site/          Leptos app: pages, components. Built natively with `ssr`
+                 (into the server) and as wasm with `hydrate`.
+  server/        The backend, as NestForge modules (below).
+  content/       content/ → compiled-in data (build-time loader + validator).
+  contact/       Contact form rules (shared with the browser) + spam checks + mail.
+  game_room/     Bevy room (separate wasm bundle, lazy-loaded).
+  pool_physics/  Pool simulation, tested natively.
+  bridge/        Site ↔ room event types.
+  texbake/       Offline texture baker (KTX2, BC + ETC2).
+content/         Projects, about, experience, skills (see CONTENT.md)
+assets/          Served at the site root: fonts, media, room bundle + textures
+style/           main.css
 ```
 
-The two are independent projects (separate dependency trees, separate test
-suites) that happen to live in one repo. Each has its own README with full
-setup instructions; this one is just the map.
+## Backend modules
 
-## Quick start
+The server is a [NestForge](https://github.com/vernonthedev/nestforge) app (NestJS-style modules and dependency injection on Axum) with the Leptos router mounted alongside. Shared services are providers resolved from the container, not globals.
 
-1. **Backend** (`cd backend`): `composer install`, create a Postgres
-   database, `cp .env.example .env` and fill it in, `bin/console migrate`,
-   `bin/console db:seed`, then `php server.php` to serve it on
-   `localhost:9501`. Full details in [`backend/README.md`](backend/README.md).
-2. **Frontend** (`cd frontend`): `bun install`, `cp .env.example .env`,
-   `bun --bun run dev` to serve it on `localhost:3000`. Full details in
-   [`frontend/README.md`](frontend/README.md).
+| module | routes | provides |
+|---|---|---|
+| `CoreModule` | `GET /healthz` | `AppConfig` (env), logging |
+| `ContentModule` | `GET /api/content/{projects, projects/{slug}, skills, experience, about}` | `ContentRepository` |
+| `ContactModule` | `POST /api/contact`, `GET /api/contact/token` | `ContactService` (validation, spam checks, mailer) |
+| `RoomModule` | `GET /api/room/featured`, `/room/bundle/*` (pre-compressed) | |
+| `SeoModule` | `GET /robots.txt`, `GET /sitemap.xml` (built from content) | |
+| `AuthModule`, `AdminModule` | (empty, for the dashboard) | |
 
-Both need to be running at once for the dashboard to eventually talk to real
-data - see Status below for how much of that wiring actually exists yet.
+Everything else (every page, Leptos server functions at `POST /api/{fn}`, static files) is the Leptos router in `crates/server/src/app.rs`. To add a module: create `crates/server/src/<name>/mod.rs` with a `#[module(...)]`, add it to `AppModule`'s `imports`. NestForge's route macro wants an OpenAPI schema for every handler's return type; return `core::JsonBody` / `core::RawResponse` (or `String`) rather than raw `Json<Value>`/`Response`.
 
-## Status
+## Deploying
 
-**Backend**: the Postgres schema, migration system + CLI, admin
-login/password-reset, and a full activity log are done and tested (TDD from
-early on - see `backend/README.md`). Clients/projects/quotes/invoices don't
-have API endpoints yet.
+One binary plus the `target/site` folder.
 
-**Frontend**: the terminal dashboard shell is built - sidebar nav, top bar
-(theme picker, notifications, user menu), the vim keybindings and command
-bar, a Matrix-rain background, and a panel-grid dashboard - but it's still
-running on mock data. No login flow yet, so nothing is wired to the real
-backend.
+```sh
+just build                                   # → target/release/server + target/site/
+```
 
-**Next up**: CRUD endpoints for clients/projects/quotes/invoices on the
-backend, a login flow on the frontend, then connecting the two. A future
-"thoughts" feature (posts/comments/claps/views, separate from the CRM side)
-is deferred indefinitely.
+Run it with:
 
-## Conventions
+| variable | |
+|---|---|
+| `LEPTOS_ENV=PROD` | production mode: secure cookies; refuses to start without email config |
+| `LEPTOS_SITE_ADDR=0.0.0.0:8080` | listen address |
+| `LEPTOS_SITE_ROOT=site` | path to the copied `target/site` folder |
+| `LEPTOS_OUTPUT_NAME=arthub` | must match the build |
+| `CONTACT_TO`, `CONTACT_FROM`, + SMTP or API key | see `.env.example` |
+| `TRUST_PROXY=1` | behind Fly/Railway/nginx, so per-IP rate limits see real clients |
+| `SITE_URL=https://your.domain` | public origin for canonical links, share images and the sitemap |
 
-- Git: create a branch, commit there, merge to `main` - never commit
-  directly on `main`.
-- Commit messages: `<type> | <message>` (e.g. `feat | add invoice line
-  items`), not Conventional Commits' `type: message`.
-- TDD on both sides: write the test first.
+Or as a container (the image builds the room, the site and the server, then ships only the binary and `site/`):
+
+```sh
+docker build -t arthub .
+docker run -p 8080:8080 --env-file .env -e SITE_URL=https://your.domain arthub
+```
+
+Health check: `GET /healthz` → `200 ok`. The server binds the address itself (it doesn't use NestForge's `listen()`, which is 127.0.0.1-only) and passes client addresses through for rate limiting. Serve `/pkg/*`, `/room/bundle/*` and `/media/*` with long cache lifetimes if a CDN fronts it; the room bundle already ships `.br`/`.gz` siblings.
+
+## Design tokens
+
+All in `:root` in `style/main.css`. `--accent` is a neutral chalk off-white used as an inverted fill. Change that one value to re-skin the site. Neon tones (`--neon-pink`, `--neon-cyan`) are reserved for the game room.
+
+## Cursor states
+
+Add `data-cursor="view" | "drag" | "shoot" | "link"` to any element. Links and buttons get `link` automatically. The cursor only runs for fine pointers, and the trailing ring snaps to the pointer instead of easing under `prefers-reduced-motion`.

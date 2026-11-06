@@ -1,0 +1,20 @@
+[package]
+name = "contact"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Contact form: shared validation (site + server) and, with `server`, spam checks and mail delivery."
+
+[dependencies]
+tokio = { workspace = true, optional = true, features = ["time"] }
+lettre = { version = "0.11", optional = true, default-features = false, features = ["builder", "smtp-transport", "pool", "hostname", "tokio1", "tokio1-rustls", "ring", "webpki-roots"] }
+reqwest = { version = "0.13", optional = true, default-features = false, features = ["rustls-no-provider", "json", "http2"] }
+rustls = { version = "0.23", optional = true, default-features = false, features = ["ring", "std", "tls12"] }
+serde_json = { version = "1", optional = true }
+tracing = { version = "0.1", optional = true }
+
+[features]
+server = ["dep:tokio", "dep:lettre", "dep:reqwest", "dep:rustls", "dep:serde_json", "dep:tracing"]
+
+[dev-dependencies]
+tokio = { workspace = true }

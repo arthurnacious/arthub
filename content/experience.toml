@@ -1,0 +1,46 @@
+# Your timeline, newest first. Every entry below is a PLACEHOLDER: replace it.
+#
+# kind: "job", "freelance", "education" or "milestone"
+# end:  leave empty ("") for "Now"
+# placeholder = true shows a "Placeholder" badge; delete the line once real.
+
+# A downloadable CV: put the PDF in assets/media/ and uncomment.
+# cv = "cv.pdf"
+
+[[role]]
+title = "Senior Web Developer"
+org = "Example Company"
+kind = "job"
+start = "2024"
+end = ""
+location = "Johannesburg"
+summary = "PLACEHOLDER: one line on what you own and the impact you've had."
+placeholder = true
+
+[[role]]
+title = "Systems Engineer"
+org = "Example Corp"
+kind = "job"
+start = "2021"
+end = "2024"
+location = "Remote"
+summary = "PLACEHOLDER: the platform or systems you built and kept running."
+placeholder = true
+
+[[role]]
+title = "Freelance developer"
+org = "Self-employed"
+kind = "freelance"
+start = "2019"
+end = "2021"
+summary = "PLACEHOLDER: the kind of clients and projects you took on."
+placeholder = true
+
+[[role]]
+title = "BSc Computer Science"
+org = "Example University"
+kind = "education"
+start = "2015"
+end = "2018"
+summary = "PLACEHOLDER: degree, focus, anything worth bragging about."
+placeholder = true

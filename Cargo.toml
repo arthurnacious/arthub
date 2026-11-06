@@ -1,0 +1,53 @@
+[workspace]
+resolver = "3"
+members = ["crates/site", "crates/server", "crates/bridge", "crates/contact", "crates/content", "crates/game_room", "crates/pool_physics", "crates/texbake", "crates/store"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "UNLICENSED"
+
+[workspace.dependencies]
+leptos = "0.8"
+leptos_meta = "0.8"
+leptos_router = "0.8"
+leptos_axum = "0.8"
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1"
+web-sys = "0.3"
+http = "1"
+bridge = { path = "crates/bridge" }
+content = { path = "crates/content" }
+contact = { path = "crates/contact" }
+store = { path = "crates/store" }
+pool_physics = { path = "crates/pool_physics" }
+glam = "0.33"
+
+# The DOM site's WASM bundle. Size beats speed here: it has to be
+# interactive in under 2s on a mid-range phone.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[[workspace.metadata.leptos]]
+name = "arthub"
+bin-package = "server"
+bin-target = "server"
+lib-package = "site"
+lib-features = ["hydrate"]
+lib-profile-release = "wasm-release"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+style-file = "style/main.css"
+assets-dir = "assets"
+site-addr = "127.0.0.1:3000"
+reload-port = 3001
+browserquery = "defaults"
+env = "DEV"
+# Content is compiled into the site, so edits to it must trigger a rebuild.
+watch-additional-files = ["content", "assets/media"]

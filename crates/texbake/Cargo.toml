@@ -1,0 +1,12 @@
+[package]
+name = "texbake"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Offline: bake art/ source textures into mipmapped, zstd-supercompressed KTX2 (BC + ETC2)."
+publish = false
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+intel_tex_2 = "0.5"
+zstd = "0.13"

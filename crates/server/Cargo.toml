@@ -1,0 +1,27 @@
+[package]
+name = "server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+site = { path = "../site", features = ["ssr"] }
+contact = { workspace = true, features = ["server"] }
+content.workspace = true
+store.workspace = true
+nestforge = "1.9"
+anyhow = "1"
+leptos = { workspace = true, features = ["ssr"] }
+leptos_axum.workspace = true
+axum = { workspace = true, features = ["multipart"] }
+imagesize = "0.15"
+tokio.workspace = true
+tower-http = { version = "0.6", features = ["fs", "set-header"] }
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }

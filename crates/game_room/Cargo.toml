@@ -1,0 +1,47 @@
+[package]
+name = "game_room"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "game_room"
+path = "src/main.rs"
+
+[dependencies]
+bridge.workspace = true
+pool_physics.workspace = true
+
+# Only what the room uses. No glTF, scenes, animation, sprites or gamepads.
+[dependencies.bevy]
+version = "0.20"
+default-features = false
+features = [
+  "std", "bevy_log", "bevy_asset", "bevy_state", "bevy_winit", "bevy_window",
+  "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_post_process", "bevy_light",
+  "bevy_camera", "bevy_image", "bevy_mesh", "bevy_material", "bevy_shader", "bevy_color",
+  "bevy_gizmos", "bevy_gizmos_render", "bevy_picking", "mesh_picking", "custom_cursor",
+  "keyboard", "mouse", "touch",
+  "tonemapping_luts", "ktx2", "zstd_rust", "png", "hdr", "bevy_mikktspace",
+  "bevy_audio", "wav", "jpeg", "webp",
+]
+
+# Native gets the dev HUD (Bevy UI + embedded font) and threads; the browser
+# HUD is DOM, so the wasm build leaves bevy_ui/bevy_text out entirely.
+# Natively the room reads content/ itself (the site passes it in on the web).
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+content = { workspace = true, features = ["parse"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.bevy]
+version = "0.20"
+default-features = false
+features = ["multi_threaded", "wayland", "x11", "bevy_ui", "bevy_ui_render", "bevy_text", "default_font"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { version = "0.20", default-features = false, features = ["webgl2", "web"] }
+wasm-bindgen.workspace = true
+console_error_panic_hook.workspace = true
+web-sys = { workspace = true, features = ["Window"] }

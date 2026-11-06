@@ -1,0 +1,48 @@
+# Skill groups. Every entry below is a PLACEHOLDER: adjust to what you
+# actually use.
+#
+# level: "daily" (use it every day), "confident" (ship real work with it),
+#        "learning" (picking it up). Shown as chalk tallies, never percentages.
+
+[[group]]
+name = "Languages"
+blurb = "PLACEHOLDER: what you reach for first."
+placeholder = true
+skills = [
+  { name = "Rust", level = "daily", note = "Web, systems, WASM" },
+  { name = "TypeScript", level = "daily" },
+  { name = "SQL", level = "confident" },
+  { name = "Go", level = "learning" },
+]
+
+[[group]]
+name = "Web"
+blurb = "PLACEHOLDER"
+placeholder = true
+skills = [
+  { name = "Leptos", level = "confident" },
+  { name = "Axum", level = "daily" },
+  { name = "WebAssembly", level = "confident" },
+  { name = "CSS", level = "daily", note = "No frameworks needed" },
+]
+
+[[group]]
+name = "Systems & Ops"
+blurb = "PLACEHOLDER"
+placeholder = true
+skills = [
+  { name = "Linux", level = "daily" },
+  { name = "PostgreSQL", level = "confident" },
+  { name = "Docker", level = "confident" },
+  { name = "Kubernetes", level = "learning" },
+]
+
+[[group]]
+name = "3D & Graphics"
+blurb = "PLACEHOLDER"
+placeholder = true
+skills = [
+  { name = "Bevy", level = "confident" },
+  { name = "WebGPU", level = "learning" },
+  { name = "Blender", level = "learning" },
+]
